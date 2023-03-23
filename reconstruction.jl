@@ -1,6 +1,4 @@
 # Functions for reconstructing slopes
-# TODO: implement characteristic-based reconstruction
-# TODO: use different reconstruction schemes for different characteristic variables
 
 # Minmod slope limiter
 function minmod(a, b)
