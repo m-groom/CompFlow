@@ -36,13 +36,31 @@ function ExactRiemannSolver(QL, QR, ξ, γ)
     # Compute exact solution for pressure and velocity in the star region
     WL = [DL; UL; PL]; # left primitive variables
     WR = [DR; UR; PR]; # right primitive variables
-    PS, US = newton(WL, WR, CL, CR, G);
+    PM, UM = newton(WL, WR, CL, CR, G);
+
+    # Sample the solution
+    if (ξ <= UM) # Left of the contact discontinuity
+        if (PS <= PM) # Left rarefaction
+            ρ = QL[1];
+            ρu = QL[2]; 
+            ρE = QL[3];
+        else
+            CML = CL*(PM/PL)^(G[1]);
+            STL = UM - CML;
+            if (ξ > STL) # Left star region
+                ρ = DL*(PM/PL)^(1.0/γ);
+                ρu = ρ*UM;
+                # TODO: make a function to compute e from the primitive variables
+                # e = p / ((γ-1)*ρ)
+                # Currently on p180 of Toro
+                ρE = ρ * (e + 0.5 * UM^2);
+
 
 
 
 
     
     # Return vector of conserved variables
-    # return [h; h*u; h*psi]
+    return [ρ; ρu; ρE]
 end
 
