@@ -1,8 +1,8 @@
 # Functions describing the system of equations
 include("equation_of_state.jl")
 
-# Define the (inviscid) flux as a function of Q
-function Fx(Q, γ)
+# Define the advective flux as a function of Q
+function Fa(Q, γ)
     flux = zeros(3,1);
     ρ = Q[1];
     if (ρ <= 0)
@@ -22,7 +22,7 @@ function Fx(Q, γ)
 end
 
 # Define the flux Jacobian as a function of Q
-function ∂Fx(Q, γ)
+function ∂F∂Q(Q, γ)
     u = Q[2]/Q[1];
     a = speedOfSound(Q, γ);
     J = [0.0 1.0 0.0;
