@@ -107,10 +107,10 @@ function exactRiemannSolver(QL, QR, ξ, γ)
     end
 
     # Convert primitive to conserved variables
-    ρ, ρu, ρE = primToCons([ρ; u; p], γ);
+    Q = primToCons([ρ; u; p], γ);
     
     # Return vector of conserved variables
-    return [ρ; ρu; ρE]
+    return Q
 
 end
 
