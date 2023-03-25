@@ -4,15 +4,10 @@ include("newton.jl")
 include("system.jl")
 
 # Compute the exact solution of the Riemann problem (from p152 of Toro)
-# TODO: replace primitve and conserved variable calculations with functions
 function exactRiemannSolver(QL, QR, ξ, γ)
     # Calculate primitive variables
-    DL = QL[1];        # left density
-    DR = QR[1];        # right density
-    UL = QL[2]/QL[1];  # left velocity
-    UR = QR[2]/QR[1];  # right velocity
-    PL = pressure(QL, γ);   # left pressure
-    PR = pressure(QR, γ);   # right pressure
+    DL, UL, PL = consToPrim(QL, γ);
+    DR, UR, PR = consToPrim(QR, γ);
 
     # Compute γ related constants
     G1 = (γ - 1.0) / (2.0 * γ);
@@ -45,42 +40,34 @@ function exactRiemannSolver(QL, QR, ξ, γ)
         if (PM <= PL) # Left rarefaction
             SHL = UL - CL;
             if (ξ <= SHL) # Left data state
-                ρ = QL[1];
-                ρu = QL[2]; 
-                ρE = QL[3];
+                ρ = WL[1];
+                u = WL[2];
+                p = WL[3];
             else
                 CML = CL*(PM/PL)^(G[1]);
                 STL = UM - CML;
                 if (ξ > STL) # Left star region
                     ρ = DL*(PM/PL)^(1.0/γ);
-                    ρu = ρ*UM;
-                    WM = [ρ; UM; PM];
-                    e = internalEnergy(WM, γ);
-                    ρE = ρ * (e + 0.5 * UM^2);
+                    u = UM;
+                    p = PM;
                 else # Inside rarefaction fan
                     C = G[5]*(CL + G[7]*(UL - ξ));
                     ρ = DL*(C/CL)^(G[4]);
-                    U = G[5]*(CL + G[7]*UL + ξ);
-                    ρu = ρ*U;
-                    P = PL*(C/CL)^(G[3]);
-                    W = [ρ; U; P];
-                    e = internalEnergy(W, γ);
-                    ρE = ρ * (e + 0.5 * U^2);
+                    u = G[5]*(CL + G[7]*UL + ξ);
+                    p = PL*(C/CL)^(G[3]);
                 end
             end
         else # Left shock
             PML = PM/PL;
             SL = UL - CL*sqrt(G[2]*PML + G[1]);
             if (ξ <= SL) # Left data state
-                ρ = QL[1];
-                ρu = QL[2]; 
-                ρE = QL[3];
+                ρ = WL[1];
+                u = WL[2];
+                p = WL[3];
             else # Left star region
                 ρ = DL*(PML + G[6])/(PML*G[6] + 1.0);
-                ρu = ρ*UM;
-                WM = [ρ; UM; PM];
-                e = internalEnergy(WM, γ);
-                ρE = ρ * (e + 0.5 * UM^2);
+                u = UM;
+                p = PM;
             end
         end
     else # right of contact discontinuity
@@ -88,45 +75,40 @@ function exactRiemannSolver(QL, QR, ξ, γ)
             PMR = PM/PR;
             SR = UR + CR*sqrt(G[2]*PMR + G[1]);
             if (ξ >= SR) # Right data state
-                ρ = QR[1];
-                ρu = QR[2]; 
-                ρE = QR[3];
+                ρ = WR[1];
+                u = WR[2];
+                p = WR[3];
             else # Right star region
                 ρ = DR*(PMR + G[6])/(PMR*G[6] + 1.0);
-                ρu = ρ*UM;
-                WM = [ρ; UM; PM];
-                e = internalEnergy(WM, γ);
-                ρE = ρ * (e + 0.5 * UM^2);
+                u = UM;
+                p = PM;
             end
         else # Right rarefaction
             SHR = UR + CR;
             if (ξ >= SHR) # Right data state
-                ρ = QR[1];
-                ρu = QR[2]; 
-                ρE = QR[3];
+                ρ = WR[1];
+                u = WR[2];
+                p = WR[3];
             else
                 CMR = CR*(PM/PR)^(G[1]);
                 STR = UM + CMR;
                 if (ξ <= STR) # Right star region
                     ρ = DR*(PM/PR)^(1.0/γ);
-                    ρu = ρ*UM;
-                    WM = [ρ; UM; PM];
-                    e = internalEnergy(WM, γ);
-                    ρE = ρ * (e + 0.5 * UM^2);
+                    u = UM;
+                    p = PM;
                 else # Inside rarefaction fan
                     C = G[5]*(CR - G[7]*(UR - ξ));
                     ρ = DR*(C/CR)^(G[4]);
-                    U = G[5]*(-CR + G[7]*UR + ξ);
-                    ρu = ρ*U;
-                    P = PR*(C/CR)^(G[3]);
-                    W = [ρ; U; P];
-                    e = internalEnergy(W, γ);
-                    ρE = ρ * (e + 0.5 * U^2);
+                    u = G[5]*(-CR + G[7]*UR + ξ);
+                    p = PR*(C/CR)^(G[3]);
                 end
             end
         end
     end
 
+    # Convert primitive to conserved variables
+    ρ, ρu, ρE = primToCons([ρ; u; p], γ);
+    
     # Return vector of conserved variables
     return [ρ; ρu; ρE]
 

@@ -51,7 +51,8 @@ function eigvec(Q, γ)
 end
 
 # Convert conserved variables to primitive variables
-function primitive(Q, γ)
+# Note: Currently assumes ideal gas EOS
+function consToPrim(Q, γ)
     ρ = Q[1]; u = Q[2]/Q[1]; ρE = Q[3];
     p = pressure(Q, γ);
 
@@ -59,7 +60,8 @@ function primitive(Q, γ)
 end
 
 # Convert primitive variables to conserved variables
-function conserved(W, γ)
+# Note: Currently assumes ideal gas EOS
+function primToCons(W, γ)
     ρ = W[1]; u = W[2]; p = W[3];
     e = internalEnergy(W, γ);
     ρE = ρ * (e + 0.5 * u^2);

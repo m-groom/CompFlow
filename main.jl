@@ -81,8 +81,8 @@ W1 = [ρ1; u1; p1];
 W2 = [ρ2; u2; p2];
 
 # Conserved variables
-Q1 = conserved(W1, γ);
-Q2 = conserved(W2, γ);
+Q1 = primToCons(W1, γ);
+Q2 = primToCons(W2, γ);
 
 # Define the domain
 t = 0;
@@ -208,7 +208,7 @@ We = zeros(3,10000);
 for i = 1:10000
     ξ = (xe[i] - x0) / t;
     Qe[:,i] = exactRiemannSolver(Q1, Q2, ξ, γ);
-    We[:,i] = primitive(Qe[:,i], γ);
+    We[:,i] = consToPrim(Qe[:,i], γ);
 end
 
 # Plot the solution as a 3x1 subplot
