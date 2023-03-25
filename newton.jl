@@ -3,9 +3,8 @@
 
 # Newton iteration to compute p* and u*
 function newton(WL, WR, CL, CR, G)
-    # Extract primitive variables
-    DL = WL[1]; UL = WL[2]; PL = WL[3];
-    DR = WR[1]; UR = WR[2]; PR = WR[3];
+    # Extract velocities
+    UL = WL[2]; UR = WR[2]; 
 
     # Newton iteration to compute p* and u*
     PS = ANRS(WL, WR, CL, CR, G);   # Initial guess for p*
@@ -22,8 +21,9 @@ function newton(WL, WR, CL, CR, G)
         Δp = -g / dg; # Newton step   
         # line search globalization 
         δ = 1; # scale factor 0<δ<=1 
-        for ii=1:20         
-            if(abs(f(PS + δ * Δp, WL, WR, CL, CR, G)) >= res)
+        for ii=1:20   
+            gk, _ = f(PS + δ * Δp, WL, WR, CL, CR, G);       
+            if(abs(gk) >= res)
                 # if the residual of the next iteration increases then the Newton step is reduced by 2
                 δ = 0.5 * δ; 
             else 
