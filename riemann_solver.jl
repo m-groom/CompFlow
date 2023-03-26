@@ -4,6 +4,7 @@ include("newton.jl")
 include("system.jl")
 
 # Compute the exact solution of the Riemann problem (from p152 of Toro)
+# TODO: fix error, currently not giving the correct solution
 function exactRiemannSolver(QL, QR, ξ, γ)
     # Calculate primitive variables
     DL, UL, PL = consToPrim(QL, γ);
@@ -114,3 +115,32 @@ function exactRiemannSolver(QL, QR, ξ, γ)
 
 end
 
+# Rusanov solver
+# TODO: update this to use the wave speed estimates from Toro
+function rusanov(QL, QR, γ)
+    # Calculate the wave speed
+    Smax = max(maximum(abs.(eigval(QL, γ))), maximum(abs.(eigval(QR, γ))));
+    # Compute the flux
+    flux = 0.5*(Fa(QL, γ) + Fa(QR, γ)) - 0.5*Smax*(QR - QL);
+
+    return flux
+
+end
+
+# HLL solver
+# TODO: update this to use the wave speed estimates from Toro
+function HLL(QL, QR, γ)
+    # Calculate the wave speeds - Davies
+    SL = min(0.0, eigval(QL, γ)[1], eigval(QR, γ)[1]);
+    SR = max(0.0, eigval(QL, γ)[end], eigval(QR, γ)[end]);
+
+    # Compute the flux
+    flux = (SR*Fa(QL, γ) - SL*Fa(QR, γ) + SR*SL*(QR - QL))/(SR - SL);
+
+    return flux
+
+end
+
+# HLLC solver
+
+# TV solver
