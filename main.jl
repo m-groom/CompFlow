@@ -154,7 +154,7 @@ for n = 1:Nmax
     # Evolve the extrapolated values at the cell boundary
     QR, QL = evolve(QR, QL, x, dt, γ);
     # Compute the fluxes
-    # TODO: turn this into a function
+    # TODO: turn this into a function called update
     Qnew = zeros(3, imax);
     for i = 1:imax
         if (i==1)

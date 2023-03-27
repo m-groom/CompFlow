@@ -32,14 +32,14 @@ function ∂F∂Q(Q, γ)
 end
 
 # Return the eigenvalues of the flux Jacobian
-function eigval(Q, γ)
+function eigVal(Q, γ)
     u = Q[2]/Q[1];
     a = speedOfSound(Q, γ);
     return [u-a; u; u+a]
 end
 
-# Return the eigenvectors of the flux Jacobian
-function eigvec(Q, γ)
+# Return the right eigenvectors of the flux Jacobian
+function eigVec(Q, γ)
     ρ = Q[1]; u = Q[2]/Q[1]; ρE = Q[3];
     p = pressure(Q, γ);
     a = speedOfSound(Q, γ);
@@ -48,6 +48,18 @@ function eigvec(Q, γ)
     V2 = [1.0; u; 0.5*u^2];
     V3 = [1.0; u+a; H+u*a];
     return [V1 V2 V3]
+end
+
+# Return the left eigenvectors of the flux Jacobian
+# Note: Currently assumes ideal gas EOS
+function eigVecInv(Q, γ)
+    u = Q[2]/Q[1];
+    a = speedOfSound(Q, γ);
+    a2 = a^2;
+    V1 = [0.5*u^2 + u*a/(γ-1.0), -a/(γ-1.0)-u, 1.0];
+    V2 = [2.0*a^2/(γ-1.0)-u^2, 2.0*u, -2.0];
+    V3 = [0.5*u^2 - u*a/(γ-1.0), a/(γ-1.0)-u, 1.0];
+    return 0.5 * (γ-1.0)/a2 * [V1; V2; V3]
 end
 
 # Convert conserved variables to primitive variables
