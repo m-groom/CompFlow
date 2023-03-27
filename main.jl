@@ -10,17 +10,19 @@ include("reconstruction.jl")
 γ = 1.4;
 
 # Define the domain
+# TODO: read this from an input file
 t = 0;
 xL = 0;
 xR = 1;
 imax = 100; # number of control volumes
-dx = (xR - xL) / imax;
-x = collect(xL+dx/2:dx:xR-dx/2);
 Nmax = 10000; # Maximum number of time steps
 CFL = 0.5; # Courant-Friedrichs-Lewy number
+# TODO: turn this into a function
+dx = (xR - xL) / imax;
+x = collect(xL:dx:xR);
 
 # Define the problem
-test = 6; # test case to use (0-6)
+test = 1; # test case to use (0-6)
 
 if (test == 0) # RP0 from Toro
     ρ1 = 1.0;
@@ -112,18 +114,19 @@ end
 
 # Plot the initial condition as a 3x1 subplot
 # TODO: turn this into a function
+xc = collect(xL+dx/2:dx:xR-dx/2);
 figure(1)
 subplot(3, 1, 1)
-plot(x, W[1,:], "bo", fillstyle="none")
+plot(xc, W[1,:], "bo", fillstyle="none")
 title("Initial condition")
 xlabel("x")
 ylabel("ρ")
 subplot(3, 1, 2)
-plot(x, W[2,:], "bo", fillstyle="none")
+plot(xc, W[2,:], "bo", fillstyle="none")
 xlabel("x")
 ylabel("u")
 subplot(3, 1, 3)
-plot(x, W[3,:], "bo", fillstyle="none")
+plot(xc, W[3,:], "bo", fillstyle="none")
 xlabel("x")
 ylabel("p")
 plt.savefig("IC.png")
@@ -146,29 +149,10 @@ for n = 1:Nmax
     if (t >= tend)
         break
     end
-    # Piecewise linear reconstruction in space
-    # TODO: turn this into a function
-    ΔQ = zeros(3,imax);
-    QR = zeros(3,imax);
-    QL = zeros(3,imax);
-    for i = 1:imax
-        if (i==1)
-            ΔQ[:,i] = zeros(3,1); 
-        elseif (i==imax)
-            ΔQ[:,i] = zeros(3,1); 
-        else
-            ΔQ[:,i] = minmod.(Q[:,i] - Q[:,i-1], Q[:,i+1] - Q[:,i]);
-        end
-        # Compute the extrapolated values at the cell boundary
-        # TODO: generalise this to be either first or second-order
-        QR[:,i] = Q[:,i] + 0.5 * ΔQ[:,i];
-        QL[:,i] = Q[:,i] - 0.5 * ΔQ[:,i];
-        # Compute the time derivative (Cauchy-Kovalevskaya): Q_t = -F_x
-        Qt = - (Fa(QR[:,i], γ) - Fa(QL[:,i], γ)) / dx;
-        # Update the extrapolated values
-        QR[:,i] = QR[:,i] + 0.5 * dt * Qt;
-        QL[:,i] = QL[:,i] + 0.5 * dt * Qt;
-    end 
+    # Reconstruct the extrapolated values at the cell boundary
+    QR, QL = reconstruct(Q);
+    # Evolve the extrapolated values at the cell boundary
+    QR, QL = evolve(QR, QL, x, dt, γ);
     # Compute the fluxes
     # TODO: turn this into a function
     Qnew = zeros(3, imax);
@@ -176,29 +160,11 @@ for n = 1:Nmax
         if (i==1)
             # Dirichlet boundary condition
             Qnew[:,i] = Q1;
-            # # Reflective boundary condition
-            # QGod = ExactRiemannSolver(QR[:,i], QL[:,i+1], 0, g);
-            # Fp = F(QGod, g);
-            # QBC = [QL[1,i]; -QL[2,i]; -QL[3,i]];
-            # QGod = ExactRiemannSolver(QBC, QL[:,i], 0, g);
-            # Fm = F(QGod, g);
-            # Qnew[:,i] = Q[:,i] - dt/dx * (Fp - Fm);
         elseif (i==imax)
             # Dirichlet boundary condition
             Qnew[:,i] = Q2;
-            # # Reflective boundary condition
-            # QBC = [QR[1,i]; -QR[2,i]; -QR[3,i]];
-            # QGod = ExactRiemannSolver(QR[:,i], QBC, 0, g);
-            # Fp = F(QGod, g);
-            # QGod = ExactRiemannSolver(QR[:,i-1], QL[:,i], 0, g);
-            # Fm = F(QGod, g);
-            # Qnew[:,i] = Q[:,i] - dt/dx * (Fp - Fm);
         else
-            # QGod = exactRiemannSolver(QR[:,i], QL[:,i+1], 0, γ);
-            # Fp = Fa(QGod, γ);
             Fp = HLL(QR[:,i], QL[:,i+1], γ)
-            # QGod = exactRiemannSolver(QR[:,i-1], QL[:,i], 0, γ);
-            # Fm = Fa(QGod, γ);
             Fm = HLL(QR[:,i-1], QL[:,i], γ)
             Qnew[:,i] = Q[:,i] - dt/dx * (Fp - Fm);
         end
@@ -215,10 +181,11 @@ end
 
 # Compute the exact solution
 # TODO: turn this into a function
-xe = collect(range(xL, xR, length=10000));
-Qe = zeros(3,10000);
-We = zeros(3,10000);
-for i = 1:10000
+Ne = 10000;
+xe = collect(range(xL+dx/2, xR-dx/2, length=Ne));
+Qe = zeros(3,Ne);
+We = zeros(3,Ne);
+for i = 1:Ne
     ξ = (xe[i] - x0) / t;
     Qe[:,i] = exactRiemannSolver(Q1, Q2, ξ, γ);
     We[:,i] = consToPrim(Qe[:,i], γ);
@@ -228,18 +195,18 @@ end
 # TODO: turn this into a function
 figure(2)
 subplot(3, 1, 1)
-plot(x, W[1,:], "bo", fillstyle="none", zorder = 5)
+plot(xc, W[1,:], "bo", fillstyle="none", zorder = 5)
 plot(xe, We[1,:], "k-", zorder = 1)
 title("Solution")
 xlabel("x")
 ylabel("ρ")
 subplot(3, 1, 2)
-plot(x, W[2,:], "bo", fillstyle="none", zorder = 5)
+plot(xc, W[2,:], "bo", fillstyle="none", zorder = 5)
 plot(xe, We[2,:], "k-", zorder = 1)
 xlabel("x")
 ylabel("u")
 subplot(3, 1, 3)
-plot(x, W[3,:], "bo", fillstyle="none", zorder = 5)
+plot(xc, W[3,:], "bo", fillstyle="none", zorder = 5)
 plot(xe, We[3,:], "k-", zorder = 1)
 xlabel("x")
 ylabel("p")
