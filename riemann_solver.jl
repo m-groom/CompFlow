@@ -115,32 +115,73 @@ function exactRiemannSolver(QL, QR, ξ, γ)
 
 end
 
-# Rusanov solver
-# TODO: update this to use the wave speed estimates from Toro
-function rusanov(QL, QR, γ)
-    # Calculate the wave speed
-    Smax = max(maximum(abs.(eigVal(QL, γ))), maximum(abs.(eigVal(QR, γ))));
-    # Compute the flux
-    flux = 0.5*(Fa(QL, γ) + Fa(QR, γ)) - 0.5*Smax*(QR - QL);
-
-    return flux
-
-end
-
 # HLL solver
-# TODO: update this to use the wave speed estimates from Toro
+# TODO: generalise this to contain the Rusanov and HLLC solvers
 function HLL(QL, QR, γ)
-    # Calculate the wave speeds - Davies
-    SL = min(0.0, eigVal(QL, γ)[1], eigVal(QR, γ)[1]);
-    SR = max(0.0, eigVal(QL, γ)[end], eigVal(QR, γ)[end]);
+    # Calculate primitive variables
+    WL = consToPrim(QL, γ);
+    WR = consToPrim(QR, γ);
+
+    # Compute γ related constants
+    G1 = (γ - 1.0) / (2.0 * γ);
+    G2 = (γ + 1.0) / (2.0 * γ);
+    G3 = 2.0 * γ / (γ - 1.0);
+    G4 = 2.0 / (γ - 1.0);
+    G5 = 2.0 / (γ + 1.0);
+    G6 = (γ - 1.0) / (γ + 1.0);
+    G7 = (γ - 1.0) / 2.0;
+    G8 = γ - 1.0;
+    # Package these into a single vector
+    G = [G1; G2; G3; G4; G5; G6; G7; G8];
+
+    # Compute the speeds of sound
+    CL = speedOfSound(QL, γ);
+    CR = speedOfSound(QR, γ);
+
+    # Estimate the wave speeds
+    SL, _, SR = waveSpeeds(WL, WR, CL, CR, G);
+
+    # # Rusanov solver
+    # Smax = max(abs(SL), abs(SR));
+    # flux = 0.5*(Fa(QL, γ) + Fa(QR, γ)) - 0.5*Smax*(QR - QL);
 
     # Compute the flux
-    flux = (SR*Fa(QL, γ) - SL*Fa(QR, γ) + SR*SL*(QR - QL))/(SR - SL);
+    if (SL >= 0)
+        flux = Fa(QL, γ);
+    elseif (SR <= 0)
+        flux = Fa(QR, γ);
+    else
+        flux = (SR*Fa(QL, γ) - SL*Fa(QR, γ) + SR*SL*(QR - QL))/(SR - SL);
+    end
 
     return flux
 
 end
 
-# HLLC solver
+# Function for estimating wave speeds for the HLLC solver
+function waveSpeeds(WL, WR, CL, CR, G)
+    # Extract the primitive variables
+    DL, UL, PL = WL;
+    DR, UR, PR = WR;
+    # Estimate the pressure and velocity in the star region
+    PM, UM = ANRS(WL, WR, CL, CR, G);
+    
+    # Compute the left and right wave speeds
+    if (PM <= PL)
+        SL = UL - CL;
+    else 
+        SL = UL - CL*sqrt(1.0 + G[2]*(PM/PL - 1.0));
+    end
 
-# TV solver
+    if (PM <= PR)
+        SR = UR + CR;
+    else
+        SR = UR + CR*sqrt(1.0 + G[2]*(PM/PR - 1.0));
+    end
+
+    SM = UM;
+    # SM = (PR - PL + DL*UL*(SL-UL) - DR*UR*(SR-UR)) / (DL*(SL-UL) - DR*(SR-UR));
+
+    return SL, SM, SR
+
+end

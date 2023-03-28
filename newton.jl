@@ -7,7 +7,7 @@ function newton(WL, WR, CL, CR, G)
     UL = WL[2]; UR = WR[2]; 
 
     # Newton iteration to compute p* and u*
-    PS = ANRS(WL, WR, CL, CR, G);   # Initial guess for p*
+    PS, _ = ANRS(WL, WR, CL, CR, G);   # Initial guess for p*
     ϵ = 1e-12;                      # tolerance
     maxIter = 100;                  # maximum number of iterations
 
@@ -90,7 +90,7 @@ function ANRS(WL, WR, CL, CR, G)
     Quser = 2.0;
     # Compute initial guess for pressure in the star region from PVRS
     CUP = 0.25 * (DL + DR) * (CL + CR);
-    PPV = max(0.0, 0.5 * (PL + PR) - 0.5 * (UR - UL) * CUP);
+    PPV = max(0.0, 0.5 * (PL + PR) + 0.5 * (UL - UR) * CUP);
     Pmin = min(PL, PR);
     Pmax = max(PL, PR);
     Qmax = Pmax / Pmin;
@@ -98,6 +98,7 @@ function ANRS(WL, WR, CL, CR, G)
     if (Qmax <= Quser && (Pmin <= PPV && PPV <= Pmax))
         # Use solution from PVRS Riemann solver
         PM = PPV;
+        UM = 0.5 * (UL + UR) + 0.5 * (PL - PR) / CUP;
     else
         if (PPV < Pmin)
             # Use solution from the Two-Rarefaction Riemann solver
@@ -108,12 +109,13 @@ function ANRS(WL, WR, CL, CR, G)
             PM = 0.5 * (PL*PTL^(G[3]) + PR*PTR^(G[3]));
         else
             # Use solution from the Two-Shock Riemann solver
-            GEL = sqrt((G[5]/DL)/(G[6]*PL + PPV));
-            GER = sqrt((G[5]/DR)/(G[6]*PR + PPV));
+            GEL = sqrt(G[5]/(DL*(G[6]*PL + PPV)));
+            GER = sqrt(G[5]/(DR*(G[6]*PR + PPV)));
             PM = (GEL*PL + GER*PR - (UR - UL))/(GEL + GER);
+            UM = 0.5*(UL + UR) + 0.5*(GER*(PM - PR) - GEL*(PM - PL))
         end
     end
 
-    return PM
+    return PM, UM
 
 end

@@ -22,7 +22,7 @@ dx = (xR - xL) / imax;
 x = collect(xL:dx:xR);
 
 # Define the problem
-test = 6; # test case to use (0-6)
+test = 5; # test case to use (0-6)
 
 if (test == 0) # RP0 from Toro
     ρ1 = 1.0;
