@@ -55,11 +55,10 @@ end
 function eigVecInv(Q, γ)
     u = Q[2]/Q[1];
     a = speedOfSound(Q, γ);
-    a2 = a^2;
-    V1 = [0.5*u^2 + u*a/(γ-1.0), -a/(γ-1.0)-u, 1.0];
-    V2 = [2.0*a^2/(γ-1.0)-u^2, 2.0*u, -2.0];
-    V3 = [0.5*u^2 - u*a/(γ-1.0), a/(γ-1.0)-u, 1.0];
-    return 0.5 * (γ-1.0)/a2 * [V1; V2; V3]
+    V1 = [0.5*u^2+u*a/(γ-1.0) -a/(γ-1.0)-u 1.0];
+    V2 = [2.0*a^2/(γ-1.0)-u^2 2.0*u -2.0];
+    V3 = [0.5*u^2-u*a/(γ-1.0) a/(γ-1.0)-u 1.0];
+    return 0.5 * (γ-1.0)/(a^2) * [V1; V2; V3]
 end
 
 # Convert conserved variables to primitive variables

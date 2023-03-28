@@ -22,7 +22,7 @@ dx = (xR - xL) / imax;
 x = collect(xL:dx:xR);
 
 # Define the problem
-test = 1; # test case to use (0-6)
+test = 6; # test case to use (0-6)
 
 if (test == 0) # RP0 from Toro
     ρ1 = 1.0;
@@ -150,7 +150,7 @@ for n = 1:Nmax
         break
     end
     # Reconstruct the extrapolated values at the cell boundary
-    QR, QL = reconstruct(Q);
+    QR, QL = reconstruct(Q, γ);
     # Evolve the extrapolated values at the cell boundary
     QR, QL = evolve(QR, QL, x, dt, γ);
     # Compute the fluxes
