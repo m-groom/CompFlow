@@ -116,6 +116,7 @@ function exactRiemannSolver(QL, QR, ξ, γ)
 end
 
 # HLLC solver
+# TODO add a flattener from Balsara, J. Comput. Phys., 2012.
 function HLLC(QL, QR, γ)
     # Calculate primitive variables
     WL = consToPrim(QL, γ);
@@ -140,9 +141,9 @@ function HLLC(QL, QR, γ)
     # Estimate the wave speeds
     SL, SM, SR = waveSpeeds(WL, WR, CL, CR, G);
 
-    # # Rusanov solver
+    # # Rusanov flux
     # Smax = max(abs(SL), abs(SR));
-    # flux = 0.5*(Fa(QL, γ) + Fa(QR, γ)) - 0.5*Smax*(QR - QL);
+    # rusanovFlux = 0.5*(Fa(QL, γ) + Fa(QR, γ)) - 0.5*Smax*(QR - QL);
 
     # Compute the flux
     if (SL >= 0) # Supersonic flow to the right
@@ -150,8 +151,9 @@ function HLLC(QL, QR, γ)
     elseif (SR <= 0) # Supersonic flow to the left
         flux = Fa(QR, γ);
     else
-        # # HLL solver
-        # flux = (SR*Fa(QL, γ) - SL*Fa(QR, γ) + SR*SL*(QR - QL))/(SR - SL);
+        # # HLL flux
+        # hllFlux = (SR*Fa(QL, γ) - SL*Fa(QR, γ) + SR*SL*(QR - QL))/(SR - SL);
+        # HLLC flux
         if (SM >= 0) # Subsonic flow to the right
             DL = QL[1]; EL = QL[3]/QL[1]; UL = WL[2]; PL = WL[3];
             QM = DL * (SL - UL) / (SL - SM) * [1.0; SM; EL + (SM-UL)*(SM + PL/(DL*(SL-UL)))];
@@ -161,6 +163,16 @@ function HLLC(QL, QR, γ)
             QM = DR * (SR - UR) / (SR - SM) * [1.0; SM; ER + (SM-UR)*(SM + PR/(DR*(SR-UR)))];
             flux = Fa(QR, γ) + SR*(QM - QR);
         end
+        # # Flattener
+        # PL = WL[3]; PR = WR[3];
+        # fp = min(PR/PL,PL/PR);
+        # if (fp < 0.5)
+        #     η = 1.0-fp;
+        # else
+        #     η = 0.0;
+        # end
+        # # η = 0.0;
+        # flux = (1.0-η)*flux + η*hllFlux;
     end
 
     return flux
