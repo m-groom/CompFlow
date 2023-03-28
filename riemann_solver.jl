@@ -119,7 +119,7 @@ end
 # TODO: update this to use the wave speed estimates from Toro
 function rusanov(QL, QR, γ)
     # Calculate the wave speed
-    Smax = max(maximum(abs.(eigval(QL, γ))), maximum(abs.(eigval(QR, γ))));
+    Smax = max(maximum(abs.(eigVal(QL, γ))), maximum(abs.(eigVal(QR, γ))));
     # Compute the flux
     flux = 0.5*(Fa(QL, γ) + Fa(QR, γ)) - 0.5*Smax*(QR - QL);
 
@@ -131,8 +131,8 @@ end
 # TODO: update this to use the wave speed estimates from Toro
 function HLL(QL, QR, γ)
     # Calculate the wave speeds - Davies
-    SL = min(0.0, eigval(QL, γ)[1], eigval(QR, γ)[1]);
-    SR = max(0.0, eigval(QL, γ)[end], eigval(QR, γ)[end]);
+    SL = min(0.0, eigVal(QL, γ)[1], eigVal(QR, γ)[1]);
+    SR = max(0.0, eigVal(QL, γ)[end], eigVal(QR, γ)[end]);
 
     # Compute the flux
     flux = (SR*Fa(QL, γ) - SL*Fa(QR, γ) + SR*SL*(QR - QL))/(SR - SL);
