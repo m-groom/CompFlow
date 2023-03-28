@@ -22,7 +22,7 @@ dx = (xR - xL) / imax;
 x = collect(xL:dx:xR);
 
 # Define the problem
-test = 5; # test case to use (0-6)
+test = 6; # test case to use (0-6)
 
 if (test == 0) # RP0 from Toro
     ρ1 = 1.0;
@@ -164,8 +164,8 @@ for n = 1:Nmax
             # Dirichlet boundary condition
             Qnew[:,i] = Q2;
         else
-            Fp = HLL(QR[:,i], QL[:,i+1], γ)
-            Fm = HLL(QR[:,i-1], QL[:,i], γ)
+            Fp = HLLC(QR[:,i], QL[:,i+1], γ)
+            Fm = HLLC(QR[:,i-1], QL[:,i], γ)
             Qnew[:,i] = Q[:,i] - dt/dx * (Fp - Fm);
         end
     end 

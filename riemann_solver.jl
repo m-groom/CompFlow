@@ -115,9 +115,8 @@ function exactRiemannSolver(QL, QR, ξ, γ)
 
 end
 
-# HLL solver
-# TODO: generalise this to contain the Rusanov and HLLC solvers
-function HLL(QL, QR, γ)
+# HLLC solver
+function HLLC(QL, QR, γ)
     # Calculate primitive variables
     WL = consToPrim(QL, γ);
     WR = consToPrim(QR, γ);
@@ -139,19 +138,29 @@ function HLL(QL, QR, γ)
     CR = speedOfSound(QR, γ);
 
     # Estimate the wave speeds
-    SL, _, SR = waveSpeeds(WL, WR, CL, CR, G);
+    SL, SM, SR = waveSpeeds(WL, WR, CL, CR, G);
 
     # # Rusanov solver
     # Smax = max(abs(SL), abs(SR));
     # flux = 0.5*(Fa(QL, γ) + Fa(QR, γ)) - 0.5*Smax*(QR - QL);
 
     # Compute the flux
-    if (SL >= 0)
+    if (SL >= 0) # Supersonic flow to the right
         flux = Fa(QL, γ);
-    elseif (SR <= 0)
+    elseif (SR <= 0) # Supersonic flow to the left
         flux = Fa(QR, γ);
     else
-        flux = (SR*Fa(QL, γ) - SL*Fa(QR, γ) + SR*SL*(QR - QL))/(SR - SL);
+        # # HLL solver
+        # flux = (SR*Fa(QL, γ) - SL*Fa(QR, γ) + SR*SL*(QR - QL))/(SR - SL);
+        if (SM >= 0) # Subsonic flow to the right
+            DL = QL[1]; EL = QL[3]/QL[1]; UL = WL[2]; PL = WL[3];
+            QM = DL * (SL - UL) / (SL - SM) * [1.0; SM; EL + (SM-UL)*(SM + PL/(DL*(SL-UL)))];
+            flux = Fa(QL, γ) + SL*(QM - QL);
+        else # Subsonic flow to the left
+            DR = QR[1]; ER = QR[3]/QR[1]; UR = WR[2]; PR = WR[3];
+            QM = DR * (SR - UR) / (SR - SM) * [1.0; SM; ER + (SM-UR)*(SM + PR/(DR*(SR-UR)))];
+            flux = Fa(QR, γ) + SR*(QM - QR);
+        end
     end
 
     return flux
@@ -164,7 +173,7 @@ function waveSpeeds(WL, WR, CL, CR, G)
     DL, UL, PL = WL;
     DR, UR, PR = WR;
     # Estimate the pressure and velocity in the star region
-    PM, UM = ANRS(WL, WR, CL, CR, G);
+    PM, _ = ANRS(WL, WR, CL, CR, G);
     
     # Compute the left and right wave speeds
     if (PM <= PL)
@@ -179,8 +188,7 @@ function waveSpeeds(WL, WR, CL, CR, G)
         SR = UR + CR*sqrt(1.0 + G[2]*(PM/PR - 1.0));
     end
 
-    SM = UM;
-    # SM = (PR - PL + DL*UL*(SL-UL) - DR*UR*(SR-UR)) / (DL*(SL-UL) - DR*(SR-UR));
+    SM = (PR - PL + DL*UL*(SL-UL) - DR*UR*(SR-UR)) / (DL*(SL-UL) - DR*(SR-UR));
 
     return SL, SM, SR
 
