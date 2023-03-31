@@ -11,25 +11,26 @@ include("timestepping.jl")
 include("grid.jl")
 
 # Define the domain. TODO: read this from an input file
-xL = 0;
-xR = 1;
+xL = 0.0;
+xR = 1.0;
 imax = 100; # number of control volumes
 Nmax = 10000; # Maximum number of time steps
 CFL = 0.9; # Courant-Friedrichs-Lewy number
 γ = 1.4; # Ratio of specific heats
 # Build the grid
 x = gridGen(xL, xR, imax);
+# Set the initial time
+t = 0.0;
 
 # Initial condition
-test = 2; # test case to use (0-6)
+test = 1; # test case to use (0-6)
 Q, tend = initialCondition(x, test, γ);
 
 # Plot the initial condition. TODO: make this a general plotting function
-fig1 = plotIC(x, Q, γ);
+fig1 = plotSolution(x, Q, γ, t);
 
 # Compute the approximate solution using the MUSCL-Hancock scheme
 # TODO: save the solution at specified intervals
-t = 0;
 for n = 1:Nmax
     # Compute the time step
     Δt = getTimeStep(Q, x, γ, CFL);
