@@ -24,7 +24,7 @@ x = collect(xL:dx:xR);
 test = 4; # test case to use (0-6)
 Q, tend = initialCondition(x, test, γ);
 
-# Plot the initial condition
+# Plot the initial condition. TODO: make this a general plotting function
 fig1 = plotIC(x, Q, γ);
 
 # Compute the approximate solution using the MUSCL-Hancock scheme

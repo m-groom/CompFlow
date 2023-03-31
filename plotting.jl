@@ -37,7 +37,9 @@ function plotIC(x, Q, γ)
 end
 
 # Plot the solution
-function plotSolution(x, Q, γ, t, test)
+# TODO: make this into a general plotting function for each time interval (plus IC)
+# TODO: only plot the exact solution if test > 0
+function plotSolution(x, Q, γ, t, test = 0)
     # Calculate cell centres
     xc = collect(x[1:end-1] .+ 0.5 * (x[2:end] .- x[1:end-1]));
     # Convert conserved to primitive variables
