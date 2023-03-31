@@ -20,7 +20,7 @@ function reconstruct(Q, γ)
             ΔW[:,i] = zeros(3,1); 
         else 
             # TODO: generalise this to be either first or second-order
-            ΔW[:,i] = mc.(W[:,i] - W[:,i-1], W[:,i+1] - W[:,i]);
+            ΔW[:,i] = minmod.(W[:,i] - W[:,i-1], W[:,i+1] - W[:,i]);
         end
     end
     # Extrapolate to cell boundaries
