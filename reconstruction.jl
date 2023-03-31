@@ -1,4 +1,7 @@
 # Functions for reconstructing the solution at the cell interface
+# TODO: experiment with reconstruction in characteristic variables
+
+# Load functions
 include("system.jl")
 
 # Function for performing reconstruction and returning extrapolated values
@@ -38,7 +41,7 @@ function reconstruct(Q, γ)
 
 end
 
-# Compute the time derivative (Cauchy-Kovalevskaya): Q_t = -F_x
+# Compute the time derivative (Cauchy-Kovalevskaya: Q_t = -F_x) and evolve the reconstructed data
 function evolve(QR, QL, x, dt, γ)
     imax = size(QR, 2);
     nVar = size(QR, 1);
