@@ -1,4 +1,6 @@
 # Functions for computing the solution of the Riemann problem
+
+# Load functions
 include("equation_of_state.jl")
 include("newton.jl")
 include("system.jl")
@@ -116,7 +118,6 @@ function exactRiemannSolver(QL, QR, ξ, γ)
 end
 
 # HLLC solver
-# TODO add a flattener from Balsara, J. Comput. Phys., 2012.
 function HLLC(QL, QR, γ)
     # Calculate primitive variables
     WL = consToPrim(QL, γ);
@@ -163,16 +164,6 @@ function HLLC(QL, QR, γ)
             QM = DR * (SR - UR) / (SR - SM) * [1.0; SM; ER + (SM-UR)*(SM + PR/(DR*(SR-UR)))];
             flux = Fa(QR, γ) + SR*(QM - QR);
         end
-        # # Flattener
-        # PL = WL[3]; PR = WR[3];
-        # fp = min(PR/PL,PL/PR);
-        # if (fp < 0.5)
-        #     η = 1.0-fp;
-        # else
-        #     η = 0.0;
-        # end
-        # # η = 0.0;
-        # flux = (1.0-η)*flux + η*hllFlux;
     end
 
     return flux
