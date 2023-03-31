@@ -8,6 +8,7 @@ include("reconstruction.jl")
 include("plotting.jl")
 include("initial_condition.jl")
 include("timestepping.jl")
+include("grid.jl")
 
 # Define the domain. TODO: read this from an input file
 xL = 0;
@@ -16,12 +17,11 @@ imax = 100; # number of control volumes
 Nmax = 10000; # Maximum number of time steps
 CFL = 0.9; # Courant-Friedrichs-Lewy number
 γ = 1.4; # Ratio of specific heats
-# Build the grid. TODO: turn this into a function
-dx = (xR - xL) / imax;
-x = collect(xL:dx:xR);
+# Build the grid
+x = gridGen(xL, xR, imax);
 
 # Initial condition
-test = 4; # test case to use (0-6)
+test = 2; # test case to use (0-6)
 Q, tend = initialCondition(x, test, γ);
 
 # Plot the initial condition. TODO: make this a general plotting function
