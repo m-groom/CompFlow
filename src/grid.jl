@@ -1,8 +1,5 @@
 # Functions for grid generation and manipulation
 
-# # Load functions
-# include("system.jl")
-
 # Construct a Cartesian grid
 function gridGen(xL, xR, imax)
     # Build the grid

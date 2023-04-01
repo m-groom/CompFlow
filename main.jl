@@ -1,14 +1,14 @@
 # FV solver for the solution of the 1D Euler equations
 
 # Load functions
-include("riemann_solver.jl")
-include("equation_of_state.jl")
-include("system.jl")
-include("reconstruction.jl")
-include("plotting.jl")
-include("initial_condition.jl")
-include("timestepping.jl")
-include("grid.jl")
+include("src/riemann_solver.jl")
+include("src/equation_of_state.jl")
+include("src/system.jl")
+include("src/reconstruction.jl")
+include("src/plotting.jl")
+include("src/initial_condition.jl")
+include("src/timestepping.jl")
+include("src/grid.jl")
 
 # Define the domain. TODO: read this from an input file
 xL = 0.0;
@@ -23,7 +23,7 @@ x = gridGen(xL, xR, imax);
 t = 0.0;
 
 # Initial condition
-test = 1; # test case to use (0-6)
+test = 2; # test case to use (0-6)
 Q, tend = initialCondition(x, test, γ);
 
 # Plot the initial condition. TODO: make this a general plotting function
