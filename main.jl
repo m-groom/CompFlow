@@ -10,15 +10,14 @@ include("src/initial_condition.jl")
 include("src/timestepping.jl")
 include("src/grid.jl")
 
-# Define the domain. TODO: read this from an input file
-xL = 0.0;
-xR = 1.0;
-imax = 100; # number of control volumes
+# Define the domain
+x, imax = makeGrid("grid.par")
+# Define the solver settings
 Nmax = 10000; # Maximum number of time steps
 CFL = 0.9; # Courant-Friedrichs-Lewy number
+# Define the fluid properties
 γ = 1.4; # Ratio of specific heats
-# Build the grid
-x = gridGen(xL, xR, imax);
+
 # Set the initial time
 t = 0.0;
 
