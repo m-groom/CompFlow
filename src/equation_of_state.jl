@@ -1,5 +1,15 @@
 # Functions for equation of state calculations
 
+# Read fluid properties from a file
+function fluidProperties(filename)
+    # Read the fluid properties from a file
+    file = open(filename, "r");
+    γ = parse(Float64,split(readline(file), "#")[1]);
+    close(file)
+    
+    return γ
+end
+
 # Take the vector of conserved variables as input and returns the pressure
 function pressure(Q, γ, eosType = "ideal")
     ρ = Q[1]; u = Q[2]/Q[1]; ρE = Q[3];

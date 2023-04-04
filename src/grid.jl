@@ -4,11 +4,10 @@
 function makeGrid(filename)
     # Read the domain information from a file
     file = open(filename, "r");
-    # Read variable xL, ignoring any comments that may come after it
-    xL = parse(Float64,split(readline(file), "#")[1])
-    xR = parse(Float64,split(readline(file), "#")[1])
-    imax = parse(Int,split(readline(file), "#")[1])
-    close(file);
+    xL = parse(Float64,split(readline(file), "#")[1]);
+    xR = parse(Float64,split(readline(file), "#")[1]);
+    imax = parse(Int,split(readline(file), "#")[1]);
+    close(file)
     # Build the grid
     x = gridGen(xL, xR, imax);
 
