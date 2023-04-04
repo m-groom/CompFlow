@@ -13,11 +13,9 @@ include("src/grid.jl")
 # Define the domain
 x, imax = makeGrid("grid.par")
 # Define the solver settings
-Nmax = 10000; # Maximum number of time steps
-CFL = 0.9; # Courant-Friedrichs-Lewy number
+Nmax, CFL = solverSettings("solver.par")
 # Define the fluid properties
-γ = 1.4; # Ratio of specific heats
-
+γ = fluidProperties("thermo.par")
 # Set the initial time
 t = 0.0;
 
