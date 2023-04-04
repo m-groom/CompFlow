@@ -26,8 +26,8 @@ t = 0.0;
 test = 2; # test case to use (0-6)
 Q, tend = initialCondition(x, test, γ);
 
-# Plot the initial condition. TODO: make this a general plotting function
-fig1 = plotSolution(x, Q, γ, t);
+# Plot the initial condition
+fig1 = plotSolution(x, Q, γ, t, test);
 
 # Compute the approximate solution using the MUSCL-Hancock scheme
 # TODO: save the solution at specified intervals
