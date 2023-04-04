@@ -63,7 +63,7 @@ for n = 1:Nmax
     # Update the time and the solution
     global t = t + Δt;
     global Q = Qnew;
-    # Write the solution at every 10 time steps
+    # Write the solution at every 10 time steps. TODO generalise this
     if (n%10 == 0)
         writeSolution(x, Q, "solution_$(rpad(string(round(t, digits=6)), 8, "0")).vtr")
     end
