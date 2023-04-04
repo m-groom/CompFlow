@@ -26,8 +26,10 @@ Q, tend = initialCondition(x, test, γ);
 # Plot the initial condition
 fig1 = plotSolution(x, Q, γ, t, test);
 
+# Save the initial condition
+writeSolution(x, Q, "solution_$(rpad(string(round(t, digits=6)), 8, "0")).vtr")
+
 # Compute the approximate solution using the MUSCL-Hancock scheme
-# TODO: save the solution at specified intervals
 for n = 1:Nmax
     # Compute the time step
     Δt = getTimeStep(Q, x, γ, CFL);
@@ -61,7 +63,14 @@ for n = 1:Nmax
     # Update the time and the solution
     global t = t + Δt;
     global Q = Qnew;
+    # Write the solution at every 10 time steps
+    if (n%10 == 0)
+        writeSolution(x, Q, "solution_$(rpad(string(round(t, digits=6)), 8, "0")).vtr")
+    end
 end
 
-# Plot the solution. TODO: save the solution as well
+# Plot the solution
 fig2 = plotSolution(x, Q, γ, t, test);
+
+# Save the solution
+writeSolution(x, Q, "solution_$(rpad(string(round(t, digits=6)), 8, "0")).vtr")

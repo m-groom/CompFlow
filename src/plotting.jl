@@ -1,11 +1,36 @@
-# Functions for plotting the solver output
+# Functions for plotting and saving the solver output
 
 # Load modules
 using PyPlot
+using WriteVTK
 # Load functions
 include("system.jl")
 include("riemann_solver.jl")
 include("initial_condition.jl")
+
+# Save the solution to a VTK file
+function writeSolution(x, Q, filename)
+    # Define y and z vectors
+    y = [0.0; 1.0];
+    z = [0.0; 1.0];
+    # Initialise arrays
+    ρ = zeros(length(x)-1, length(y)-1, length(z)-1);
+    ρu = zeros(length(x)-1, length(y)-1, length(z)-1);
+    ρE = zeros(length(x)-1, length(y)-1, length(z)-1);
+    # Fill arrays
+    for i = 1:length(x)-1
+        ρ[i, 1, 1] = Q[1, i];
+        ρu[i, 1, 1] = Q[2, i];
+        ρE[i, 1, 1] = Q[3, i];
+    end
+    # Write to .vtr file
+    vtk_grid(filename, x, y, z) do vtk
+        vtk["Density"] = ρ;
+        vtk["Momentum"] = ρu;
+        vtk["Energy"] = ρE;
+    end
+
+end
 
 # Plot the solution
 function plotSolution(x, Q, γ, t, test)
