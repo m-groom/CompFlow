@@ -11,11 +11,11 @@ include("src/timestepping.jl")
 include("src/grid.jl")
 
 # Define the domain
-x, imax = makeGrid("grid.par")
+x, imax = makeGrid("grid.par");
 # Define the solver settings
-Nmax, CFL = solverSettings("solver.par")
+Nmax, CFL = solverSettings("solver.par");
 # Define the fluid properties
-γ = fluidProperties("thermo.par")
+γ = fluidProperties("thermo.par");
 # Set the initial time
 t = 0.0;
 
