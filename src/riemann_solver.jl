@@ -7,7 +7,7 @@ include("system.jl")
 
 # Compute the exact solution of the Riemann problem (from p152 of Toro)
 # TODO: fix error, currently not giving the correct solution
-function exactRiemannSolver(QL, QR, ξ, γ)
+function exactRiemannSolver(QL, QR, ξ, γ) 
     # Calculate primitive variables
     DL, UL, PL = consToPrim(QL, γ);
     DR, UR, PR = consToPrim(QR, γ);
