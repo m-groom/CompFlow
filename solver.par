@@ -1,2 +1,3 @@
 10000   # Nmax: Maximum number of time steps (Int)
+10      # Nout: Output frequency (Int)
 0.9     # CFL: Courant-Friedrichs-Lewy number (Float64)
