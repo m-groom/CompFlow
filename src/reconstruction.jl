@@ -5,7 +5,7 @@ include("system.jl")
 
 # Function for performing reconstruction and returning extrapolated values
 # TODO: generalise boundary conditions
-function reconstruct(Q, γ, recType = "primitive", limiter = "minmod")
+function reconstruct(Q, γ, recType = "characteristic", limiter = "minmod")
     imax = size(Q, 2);
     nVar = size(Q, 1);
     if (recType == "primitive")
@@ -14,7 +14,7 @@ function reconstruct(Q, γ, recType = "primitive", limiter = "minmod")
         for i = 1:imax
             W[:, i] = consToPrim(Q[:, i], γ);
         end
-    elseif (recType == "conserved")
+    elseif (recType == "conserved" || recType == "characteristic")
         W = Q;
     else
         error("Invalid reconstruction type")
@@ -26,19 +26,16 @@ function reconstruct(Q, γ, recType = "primitive", limiter = "minmod")
             ΔW[:,i] = zeros(3,1); # Dirichlet boundary condition
         elseif (i==imax) 
             ΔW[:,i] = zeros(3,1); # Dirichlet boundary condition
-        else 
-            if (limiter == "minmod")
-                ΔW[:,i] = minmod.(W[:,i] - W[:,i-1], W[:,i+1] - W[:,i]);
-            elseif (limiter == "superbee")
-                ΔW[:,i] = superbee.(W[:,i] - W[:,i-1], W[:,i+1] - W[:,i]);
-            elseif (limiter == "mc")
-                ΔW[:,i] = mc.(W[:,i] - W[:,i-1], W[:,i+1] - W[:,i]);
-            elseif (limiter == "none") # Central difference
-                ΔW[:,i] = 0.5 * (W[:,i+1] - W[:,i-1]);
-            elseif (limiter == "first")
-                ΔW[:,i] = zeros(3,1); # First order reconstruction
+        else
+            if (recType == "characteristic")
+                # Get left and right eigenvectors
+                L = eigVecInv(W[:,i], γ); R = eigVec(W[:,i], γ);
+                # Project differences onto characteristic fields
+                a = L * (W[:,i] - W[:,i-1]); b = L * (W[:,i+1] - W[:,i]);
+                # Compute the slope and project back
+                ΔW[:,i] = R * slope(a, b, limiter);
             else
-                error("Invalid limiter")
+                ΔW[:,i] = slope(W[:,i] - W[:,i-1], W[:,i+1] - W[:,i], limiter);
             end
         end
     end
@@ -53,9 +50,11 @@ function reconstruct(Q, γ, recType = "primitive", limiter = "minmod")
             QR[:, i] = primToCons(WR[:, i], γ);
             QL[:, i] = primToCons(WL[:, i], γ);
         end
-    elseif (recType == "conserved")
+    elseif (recType == "conserved" || recType == "characteristic")
         QR = WR;
         QL = WL;
+    else
+        error("Invalid reconstruction type")
     end
     
     return QR, QL
@@ -77,6 +76,25 @@ function evolve(QR, QL, x, dt, γ)
 
     return QR, QL
 
+end
+
+# Function for calculating the slope
+function slope(a, b, limiter)
+    if (limiter == "minmod")
+        Δ = minmod.(a, b);
+    elseif (limiter == "superbee")
+        Δ = superbee.(a, b);
+    elseif (limiter == "mc")
+        Δ = mc.(a, b);
+    elseif (limiter == "central")
+        Δ = central.(a, b);
+    elseif (limiter == "firstOrder")
+        Δ = firstOrder.(a, b);
+    else
+        error("Invalid limiter type")
+    end
+
+    return Δ
 end
 
 # Minmod slope limiter
@@ -104,4 +122,14 @@ function mc(a, b)
     else
         return min(0, max(0.5*(a+b), 2.0*a, 2.0*b))
     end
+end
+
+# Central difference reconstruction
+function central(a, b)
+    return 0.5 * (a + b)
+end
+
+# First order reconstruction
+function firstOrder(a, b)
+    return 0.0
 end

@@ -20,7 +20,7 @@ Nmax, Nout, CFL = solverSettings("solver.par");
 t = 0.0;
 
 # Initial condition
-test = 1; # test case to use (0-6)
+test = 6; # test case to use (0-6)
 Q, tend = initialCondition(x, test, γ);
 
 # Plot the initial condition

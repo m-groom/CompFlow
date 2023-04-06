@@ -20,6 +20,7 @@ function Fa(Q, γ)
     flux[1] = ρ * u;          # mass flux
     flux[2] = ρ * u^2 + p;    # momentum flux
     flux[3] = u * (ρE + p);   # energy flux
+
     return flux
 end
 
@@ -30,6 +31,7 @@ function ∂F∂Q(Q, γ)
     J = [0.0 1.0 0.0;
          0.5*(γ-3.0)*u^2 (3.0-γ)*u γ-1.0;
          0.5*(γ-2.0)*u^3-a^2*u/(γ-1.0) 0.5*(3.0-2.0*γ)*u^2+a^2/(γ-1.0) γ*u];
+
     return J
 end
 
@@ -37,6 +39,7 @@ end
 function eigVal(Q, γ)
     u = Q[2]/Q[1];
     a = speedOfSound(Q, γ);
+
     return [u-a; u; u+a]
 end
 
@@ -49,6 +52,7 @@ function eigVec(Q, γ)
     V1 = [1.0; u-a; H-u*a];
     V2 = [1.0; u; 0.5*u^2];
     V3 = [1.0; u+a; H+u*a];
+
     return [V1 V2 V3]
 end
 
@@ -60,6 +64,7 @@ function eigVecInv(Q, γ)
     V1 = [0.5*u^2+u*a/(γ-1.0) -a/(γ-1.0)-u 1.0];
     V2 = [2.0*a^2/(γ-1.0)-u^2 2.0*u -2.0];
     V3 = [0.5*u^2-u*a/(γ-1.0) a/(γ-1.0)-u 1.0];
+
     return 0.5 * (γ-1.0)/(a^2) * [V1; V2; V3]
 end
 
