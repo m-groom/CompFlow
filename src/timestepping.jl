@@ -34,17 +34,16 @@ function getTimeStep(Q, x, γ, CFL)
 end
 
 # Function for updating the solution
+# TODO: generalise boundary conditions
 function update(QR, QL, Q, x, Δt, γ)
     imax = length(x) - 1; # number of cells
     Qnew = zeros(3, imax);
     for i = 1:imax
         Δx = x[i+1] - x[i]; # grid spacing
         if (i==1)
-            # Dirichlet boundary condition. TODO: generalise this
-            Qnew[:,i] = Q[:,i];
+            Qnew[:,i] = Q[:,i]; # Dirichlet boundary condition
         elseif (i==imax)
-            # Dirichlet boundary condition. TODO: generalise this
-            Qnew[:,i] = Q[:,i];
+            Qnew[:,i] = Q[:,i]; # Dirichlet boundary condition
         else
             Fp = HLLC(QR[:,i], QL[:,i+1], γ) # Flux at x[i+1/2]
             Fm = HLLC(QR[:,i-1], QL[:,i], γ) # Flux at x[i-1/2]
