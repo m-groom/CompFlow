@@ -5,19 +5,19 @@ include("system.jl")
 
 # Function for performing reconstruction and returning extrapolated values
 # TODO: generalise boundary conditions
-function reconstruct(Q, γ, recType = "characteristic", limiter = "minmod")
+function reconstruct(Q, γ, recVars = "primitive", recType = "regular", limiter = "minmod")
     imax = size(Q, 2);
     nVar = size(Q, 1);
-    if (recType == "primitive")
+    if (recVars == "primitive")
         # Convert to primitive variables
         W = zeros(nVar, imax);
         for i = 1:imax
             W[:, i] = consToPrim(Q[:, i], γ);
         end
-    elseif (recType == "conserved" || recType == "characteristic")
+    elseif (recVars == "conserved")
         W = Q;
     else
-        error("Invalid reconstruction type")
+        error("Invalid reconstruction variables: $(recVars)")
     end
     # Piecewise linear reconstruction in space
     ΔW = zeros(nVar, imax);
@@ -27,22 +27,24 @@ function reconstruct(Q, γ, recType = "characteristic", limiter = "minmod")
         elseif (i==imax) 
             ΔW[:,i] = zeros(3,1); # Dirichlet boundary condition
         else
-            if (recType == "characteristic")
+            if (recType == "regular")
+                ΔW[:,i] = slope(W[:,i] - W[:,i-1], W[:,i+1] - W[:,i], limiter);
+            elseif (recType == "characteristic")
                 # Get left and right eigenvectors
-                L = eigVecInv(W[:,i], γ); R = eigVec(W[:,i], γ);
+                L = eigVecInv(W[:,i], γ, recVars); R = eigVec(W[:,i], γ, recVars);
                 # Project differences onto characteristic fields
                 a = L * (W[:,i] - W[:,i-1]); b = L * (W[:,i+1] - W[:,i]);
                 # Compute the slope and project back
                 ΔW[:,i] = R * slope(a, b, limiter);
             else
-                ΔW[:,i] = slope(W[:,i] - W[:,i-1], W[:,i+1] - W[:,i], limiter);
+                error("Invalid reconstruction type: $(recType)")
             end
         end
     end
     # Extrapolate to cell boundaries
     WR = W .+ 0.5 * ΔW;
     WL = W .- 0.5 * ΔW;
-    if (recType == "primitive")
+    if (recVars == "primitive")
         # Convert back to conserved variables
         QR = zeros(nVar, imax);
         QL = zeros(nVar, imax);
@@ -50,11 +52,9 @@ function reconstruct(Q, γ, recType = "characteristic", limiter = "minmod")
             QR[:, i] = primToCons(WR[:, i], γ);
             QL[:, i] = primToCons(WL[:, i], γ);
         end
-    elseif (recType == "conserved" || recType == "characteristic")
+    else
         QR = WR;
         QL = WL;
-    else
-        error("Invalid reconstruction type")
     end
     
     return QR, QL

@@ -44,26 +44,38 @@ function eigVal(Q, γ)
 end
 
 # Return the right eigenvectors of the flux Jacobian
-function eigVec(Q, γ)
-    ρ = Q[1]; u = Q[2]/Q[1]; ρE = Q[3];
-    p = pressure(Q, γ);
-    a = speedOfSound(Q, γ);
-    H = (ρE + p) / ρ;
-    V1 = [1.0; u-a; H-u*a];
-    V2 = [1.0; u; 0.5*u^2];
-    V3 = [1.0; u+a; H+u*a];
+function eigVec(Q, γ, vars)
+    if (vars == "conserved")
+        ρ = Q[1]; u = Q[2]/Q[1]; ρE = Q[3];
+        p = pressure(Q, γ);
+        a = speedOfSound(Q, γ);
+        H = (ρE + p) / ρ;
+        V1 = [1.0; u-a; H-u*a];
+        V2 = [1.0; u; 0.5*u^2];
+        V3 = [1.0; u+a; H+u*a];
+    elseif (vars == "primitive")
+        error("Primitive variable eigenvectors not implemented yet")
+    else
+        error("Invalid variables")
+    end
 
     return [V1 V2 V3]
 end
 
 # Return the left eigenvectors of the flux Jacobian
 # Note: Currently assumes ideal gas EOS
-function eigVecInv(Q, γ)
-    u = Q[2]/Q[1];
-    a = speedOfSound(Q, γ);
-    V1 = [0.5*u^2+u*a/(γ-1.0) -a/(γ-1.0)-u 1.0];
-    V2 = [2.0*a^2/(γ-1.0)-u^2 2.0*u -2.0];
-    V3 = [0.5*u^2-u*a/(γ-1.0) a/(γ-1.0)-u 1.0];
+function eigVecInv(Q, γ, vars)
+    if (vars == "conserved")
+        u = Q[2]/Q[1];
+        a = speedOfSound(Q, γ);
+        V1 = [0.5*u^2+u*a/(γ-1.0) -a/(γ-1.0)-u 1.0];
+        V2 = [2.0*a^2/(γ-1.0)-u^2 2.0*u -2.0];
+        V3 = [0.5*u^2-u*a/(γ-1.0) a/(γ-1.0)-u 1.0];
+    elseif (vars == "primitive")
+        error("Primitive variable eigenvectors not implemented yet")
+    else
+        error("Invalid reconstruction variables")
+    end
 
     return 0.5 * (γ-1.0)/(a^2) * [V1; V2; V3]
 end
