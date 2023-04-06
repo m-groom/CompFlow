@@ -35,8 +35,8 @@ end
 
 # Function for updating the solution
 function update(QR, QL, Q, x, Δt, γ)
-    Qnew = zeros(3, imax);
     imax = length(x) - 1; # number of cells
+    Qnew = zeros(3, imax);
     for i = 1:imax
         Δx = x[i+1] - x[i]; # grid spacing
         if (i==1)
