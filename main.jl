@@ -1,4 +1,4 @@
-# FV solver for the solution of the 1D Euler equations
+# CompFlow: A finite-volume solver for the solution of the 1D Euler equations
 
 # Load functions
 include("src/riemann_solver.jl")
@@ -11,9 +11,9 @@ include("src/timestepping.jl")
 include("src/grid.jl")
 
 # Define the domain
-x, imax = makeGrid("grid.par");
+x = makeGrid("grid.par");
 # Define the solver settings
-Nmax, CFL = solverSettings("solver.par");
+Nmax, Nout, CFL = solverSettings("solver.par");
 # Define the fluid properties
 γ = fluidProperties("thermo.par");
 # Set the initial time
@@ -29,7 +29,7 @@ fig1 = plotSolution(x, Q, γ, t, test);
 # Save the initial condition
 writeSolution(x, Q, "solution_$(rpad(string(round(t, digits=6)), 8, "0")).vtr")
 
-# Compute the approximate solution using the MUSCL-Hancock scheme
+# Compute the approximate solution
 for n = 1:Nmax
     # Compute the time step
     Δt = getTimeStep(Q, x, γ, CFL);
@@ -44,33 +44,19 @@ for n = 1:Nmax
     QR, QL = reconstruct(Q, γ);
     # Evolve the extrapolated values at the cell boundary
     QR, QL = evolve(QR, QL, x, Δt, γ);
-    # Compute the fluxes. TODO: turn this into a function called update
-    Qnew = zeros(3, imax);
-    for i = 1:imax
-        if (i==1)
-            # Dirichlet boundary condition. TODO: generalise this
-            Qnew[:,i] = Q[:,i];
-        elseif (i==imax)
-            # Dirichlet boundary condition. TODO: generalise this
-            Qnew[:,i] = Q[:,i];
-        else
-            Δx = x[i+1] - x[i];
-            Fp = HLLC(QR[:,i], QL[:,i+1], γ)
-            Fm = HLLC(QR[:,i-1], QL[:,i], γ)
-            Qnew[:,i] = Q[:,i] - Δt/Δx * (Fp - Fm);
-        end
-    end 
+    # Compute the solution at the next timestep
+    Qnew = update(QR, QL, Q, x, Δt, γ);
     # Update the time and the solution
     global t = t + Δt;
     global Q = Qnew;
-    # Write the solution at every 10 time steps. TODO generalise this
-    if (n%10 == 0)
+    # Write the solution at every Nout time steps
+    if (n%Nout == 0)
         writeSolution(x, Q, "solution_$(rpad(string(round(t, digits=6)), 8, "0")).vtr")
     end
 end
 
-# Plot the solution
+# Plot the final solution
 fig2 = plotSolution(x, Q, γ, t, test);
 
-# Save the solution
+# Save the final solution
 writeSolution(x, Q, "solution_$(rpad(string(round(t, digits=6)), 8, "0")).vtr")

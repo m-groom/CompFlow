@@ -2,15 +2,17 @@
 
 # Load functions
 include("system.jl")
+include("riemann_solver.jl")
 
 # Read the solver settings from a file
 function solverSettings(filename)
     file = open(filename, "r");
     Nmax = parse(Int,split(readline(file), "#")[1]);
+    Nout = parse(Int,split(readline(file), "#")[1]);
     CFL = parse(Float64,split(readline(file), "#")[1]);
     close(file)
     
-    return Nmax, CFL
+    return Nmax, Nout, CFL
 end
 
 # Function for estimating the timestep size
@@ -28,5 +30,28 @@ function getTimeStep(Q, x, γ, CFL)
     end
     
     return CFL * Δx / Smax
+
+end
+
+# Function for updating the solution
+function update(QR, QL, Q, x, Δt, γ)
+    Qnew = zeros(3, imax);
+    imax = length(x) - 1; # number of cells
+    for i = 1:imax
+        Δx = x[i+1] - x[i]; # grid spacing
+        if (i==1)
+            # Dirichlet boundary condition. TODO: generalise this
+            Qnew[:,i] = Q[:,i];
+        elseif (i==imax)
+            # Dirichlet boundary condition. TODO: generalise this
+            Qnew[:,i] = Q[:,i];
+        else
+            Fp = HLLC(QR[:,i], QL[:,i+1], γ) # Flux at x[i+1/2]
+            Fm = HLLC(QR[:,i-1], QL[:,i], γ) # Flux at x[i-1/2]
+            Qnew[:,i] = Q[:,i] - Δt/Δx * (Fp - Fm);
+        end
+    end 
+
+    return Qnew
 
 end

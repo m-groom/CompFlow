@@ -11,7 +11,7 @@ function makeGrid(filename)
     # Build the grid
     x = gridGen(xL, xR, imax);
 
-    return x, imax
+    return x
 end
 
 # Construct a Cartesian grid
