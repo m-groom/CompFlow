@@ -44,6 +44,7 @@ function eigVal(Q, γ)
 end
 
 # Return the right eigenvectors of the flux Jacobian
+# Note: Currently assumes ideal gas EOS
 function eigVec(Q, γ, vars)
     if (vars == "conserved")
         ρ = Q[1]; u = Q[2]/Q[1]; ρE = Q[3];
