@@ -5,7 +5,7 @@ include("system.jl")
 
 # Function for performing reconstruction and returning extrapolated values
 # TODO: generalise boundary conditions
-function reconstruct(Q, γ, recVars = "primitive", recType = "regular", limiter = "minmod")
+function reconstruct(Q, γ, recVars = "conserved", recType = "characteristic", limiter = "minmod")
     imax = size(Q, 2);
     nVar = size(Q, 1);
     if (recVars == "primitive")

@@ -54,12 +54,17 @@ function eigVec(Q, γ, vars)
         V2 = [1.0; u; 0.5*u^2];
         V3 = [1.0; u+a; H+u*a];
     elseif (vars == "primitive")
-        error("Primitive variable eigenvectors not implemented yet")
+        ρ = Q[1]; W = Q;
+        a = speedOfSound(primToCons(W, γ), γ);
+        V1 = -ρ/(2.0*a) * [1.0; -a/ρ; a^2];
+        V2 = [1.0; 0.0; 0.0];
+        V3 = ρ/(2.0*a) * [1.0; a/ρ; a^2];
     else
         error("Invalid variables")
     end
 
     return [V1 V2 V3]
+
 end
 
 # Return the left eigenvectors of the flux Jacobian
@@ -71,13 +76,22 @@ function eigVecInv(Q, γ, vars)
         V1 = [0.5*u^2+u*a/(γ-1.0) -a/(γ-1.0)-u 1.0];
         V2 = [2.0*a^2/(γ-1.0)-u^2 2.0*u -2.0];
         V3 = [0.5*u^2-u*a/(γ-1.0) a/(γ-1.0)-u 1.0];
+
+        return 0.5 * (γ-1.0)/(a^2) * [V1; V2; V3]
+
     elseif (vars == "primitive")
-        error("Primitive variable eigenvectors not implemented yet")
+        ρ = Q[1]; W = Q;
+        a = speedOfSound(primToCons(W, γ), γ);
+        V1 = [0.0 1.0 -1.0/(ρ*a)];
+        V2 = [1.0 0.0 -1.0/(a^2)];
+        V3 = [0.0 1.0 1.0/(ρ*a)];
+
+        return [V1; V2; V3]
+
     else
         error("Invalid reconstruction variables")
     end
-
-    return 0.5 * (γ-1.0)/(a^2) * [V1; V2; V3]
+    
 end
 
 # Convert conserved variables to primitive variables
