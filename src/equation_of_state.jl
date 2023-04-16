@@ -35,7 +35,7 @@ end
 
 # Take the vector of primitive variables as input and returns the internal energy
 function internalEnergy(W, γ, eosType = "ideal")
-    ρ = W[1]; u = W[2]; p = W[3];
+    ρ = W[1]; p = W[3];
     if (eosType == "ideal")
         e = p / ((γ-1)*ρ);
     else

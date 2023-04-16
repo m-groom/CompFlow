@@ -45,8 +45,8 @@ function update(QR, QL, Q, x, Δt, γ)
         elseif (i==imax)
             Qnew[:,i] = Q[:,i]; # Dirichlet boundary condition
         else
-            Fp = HLLC(QR[:,i], QL[:,i+1], γ) # Flux at x[i+1/2]
-            Fm = HLLC(QR[:,i-1], QL[:,i], γ) # Flux at x[i-1/2]
+            Fp = HLLCFlux(QR[:,i], QL[:,i+1], γ) # Flux at x[i+1/2]
+            Fm = HLLCFlux(QR[:,i-1], QL[:,i], γ) # Flux at x[i-1/2]
             Qnew[:,i] = Q[:,i] - Δt/Δx * (Fp - Fm);
         end
     end 
