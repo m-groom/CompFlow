@@ -91,7 +91,7 @@ function waveSpeeds(WL, WR, CL, CR, G)
 end
 
 # Function to compute the exact solution of the Riemann problem (from p152 of Toro)
-# TODO: fix error, currently not giving the correct solution
+# TODO: fix error, currently not giving the correct solution in all cases
 function exactRiemannSolver(QL, QR, ξ, γ) 
     # Calculate primitive variables
     DL, UL, PL = consToPrim(QL, γ);
@@ -212,8 +212,8 @@ function TVFlux(QL, QR, γ)
     SL = speedOfSound(QL, γ);
     SR = speedOfSound(QR, γ);
     # Calculate linearised Riemann invariants
-    AL = sqrt(UL^2 + 4.0 * SL^2); # Real gases: AL = sqrt(UL^2 + 4.0 * HL / (DL*ep));
-    AR = sqrt(UR^2 + 4.0 * SR^2); # Real gases: AR = sqrt(UR^2 + 4.0 * HR / (DR*ep));
+    AL = sqrt(UL^2 + 4.0 * SL^2); # Real gases: AL = sqrt(UL^2 + 4.0 * HL / (DL*dedp));
+    AR = sqrt(UR^2 + 4.0 * SR^2); # Real gases: AR = sqrt(UR^2 + 4.0 * HR / (DR*dedp));
     CL = DL * (UL - AL);
     CR = DR * (UR + AR);
     # Velocity and pressure in the star region
@@ -245,6 +245,7 @@ function DOTFlux(QL, QR, γ)
 end
 
 # Computation of the Osher dissipation matrix
+# TODO: use an adaptive quadrature rule
 function osherMatrix(QL, QR, γ)
     # Definition of the 3-point Gauss-Legendre quadrature rule
     xGL = [0.5-0.1*sqrt(15.0); 0.5; 0.5+0.1*sqrt(15.0)];
