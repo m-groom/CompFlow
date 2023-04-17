@@ -83,7 +83,7 @@ function slope(a, b, limiter, recType = "regular")
     if (recType == "characteristic")
         Δ = zeros(size(a));
         Δ[1] = minmod(a[1], b[1]); # Genuinely nonlinear field
-        Δ[2] = superbee(a[2], b[2]); # Linearly degerate field
+        Δ[2] = superbee(a[2], b[2]); # Linearly degenerate field
         Δ[3] = minmod(a[3], b[3]); # Genuinely nonlinear field
     else
         if (limiter == "minmod")
