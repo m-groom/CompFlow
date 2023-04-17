@@ -5,7 +5,7 @@ include("system.jl")
 
 # Function for performing reconstruction and returning extrapolated values
 # TODO: generalise boundary conditions
-function reconstruct(Q, γ, recVars = "conserved", recType = "characteristic", limiter = "minmod")
+function reconstruct(Q, γ, limiter = "minmod", recVars = "conserved", recType = "characteristic")
     imax = size(Q, 2);
     nVar = size(Q, 1);
     if (recVars == "primitive")
@@ -28,14 +28,14 @@ function reconstruct(Q, γ, recVars = "conserved", recType = "characteristic", l
             ΔW[:,i] = zeros(3,1); # Dirichlet boundary condition
         else
             if (recType == "regular")
-                ΔW[:,i] = slope(W[:,i] - W[:,i-1], W[:,i+1] - W[:,i], limiter);
+                ΔW[:,i] = slope(W[:,i] - W[:,i-1], W[:,i+1] - W[:,i], limiter, recType);
             elseif (recType == "characteristic")
                 # Get left and right eigenvectors
                 L = eigVecInv(W[:,i], γ, recVars); R = eigVec(W[:,i], γ, recVars);
                 # Project differences onto characteristic fields
                 a = L * (W[:,i] - W[:,i-1]); b = L * (W[:,i+1] - W[:,i]);
                 # Compute the slope and project back
-                ΔW[:,i] = R * slope(a, b, limiter);
+                ΔW[:,i] = R * slope(a, b, limiter, recType);
             else
                 error("Invalid reconstruction type: $(recType)")
             end
@@ -79,19 +79,26 @@ function evolve(QR, QL, x, dt, γ)
 end
 
 # Function for calculating the slope
-function slope(a, b, limiter)
-    if (limiter == "minmod")
-        Δ = minmod.(a, b);
-    elseif (limiter == "superbee")
-        Δ = superbee.(a, b);
-    elseif (limiter == "mc")
-        Δ = mc.(a, b);
-    elseif (limiter == "central")
-        Δ = central.(a, b);
-    elseif (limiter == "firstOrder")
-        Δ = firstOrder.(a, b);
+function slope(a, b, limiter, recType = "regular")
+    if (recType == "characteristic")
+        Δ = zeros(size(a));
+        Δ[1] = minmod(a[1], b[1]); # Genuinely nonlinear field
+        Δ[2] = superbee(a[2], b[2]); # Linearly degerate field
+        Δ[3] = minmod(a[3], b[3]); # Genuinely nonlinear field
     else
-        error("Invalid limiter type")
+        if (limiter == "minmod")
+            Δ = minmod.(a, b);
+        elseif (limiter == "superbee")
+            Δ = superbee.(a, b);
+        elseif (limiter == "vanLeer")
+            Δ = vanLeer.(a, b);
+        elseif (limiter == "central")
+            Δ = central.(a, b);
+        elseif (limiter == "firstOrder")
+            Δ = firstOrder.(a, b);
+        else
+            error("Invalid limiter type")
+        end
     end
 
     return Δ
@@ -108,20 +115,28 @@ end
 
 # Superbee slope limiter
 function superbee(a, b)
+    β = 2.0; # Reproduces minmod for β=1 and superbee for β=2
     if (b >= 0)
-        return max(0, min(2.0*a, b), min(a, 2.0*b))
+        return max(0, min(β*a, b), min(a, β*b))
     else
-        return min(0, max(2.0*a, b), max(a, 2.0*b))
+        return min(0, max(β*a, b), max(a, β*b))
     end
 end
 
-# Monotonised central limiter
-function mc(a, b)
-    if (b >= 0)
-        return max(0, min(0.5*(a+b), 2.0*a, 2.0*b))
+# van Leer slope limiter
+function vanLeer(a, b)
+    if (abs(a) < 1e-15)
+        φ = 0.0;
     else
-        return min(0, max(0.5*(a+b), 2.0*a, 2.0*b))
+        r = b / a;
+        if (r < 0)
+            φ = 0.0;
+        else
+            φ = 2.0 * r / (1.0 + r);
+        end    
     end
+
+    return φ * a
 end
 
 # Central difference reconstruction
