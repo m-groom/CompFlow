@@ -43,6 +43,14 @@ function eigVal(Q, γ)
     return [u-a; u; u+a]
 end
 
+# Return the eigenvalues of the flux Jacobian as a diagonal matrix
+function eigValMat(Q, γ)
+    u = Q[2]/Q[1];
+    a = speedOfSound(Q, γ);
+
+    return [u-a 0.0 0.0; 0.0 u 0.0; 0.0 0.0 u+a]
+end
+
 # Return the right eigenvectors of the flux Jacobian
 # Note: Currently assumes ideal gas EOS
 function eigVec(Q, γ, vars)

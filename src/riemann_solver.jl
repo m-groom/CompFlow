@@ -235,3 +235,33 @@ function TVFlux(QL, QR, γ)
 
 end
 
+# DOT Riemann solver
+function DOTFlux(QL, QR, γ)
+    # Calculate |A|
+    Amat = osherMatrix(QL, QR, γ);
+    
+    return 0.5*(Fa(QL, γ) + Fa(QR, γ)) - 0.5*Amat*(QR - QL);
+
+end
+
+# Computation of the Osher dissipation matrix
+function osherMatrix(QL, QR, γ)
+    # Definition of the 3-point Gauss-Legendre quadrature rule
+    xGL = [0.5-0.1*sqrt(15.0); 0.5; 0.5+0.1*sqrt(15.0)];
+    wGL = [5.0/18.0; 4.0/9.0; 5.0/18.0];
+
+    Amat = 0.0;
+    for i = 1:3
+        # Location along straight line segment
+        Q = QL + xGL[i] * (QR - QL);
+        # Left and right eigenvectors at xGL[i]
+        L = eigVecInv(Q, γ, "conserved"); R = eigVec(Q, γ, "conserved");
+        # Eigenvalues at xGL[i]
+        Λ = eigValMat(Q, γ);
+        # Compute |A| at xGL[i]
+        Amat = Amat .+ wGL[i] * (R * abs.(Λ) * L);
+    end
+
+    return Amat
+
+end
