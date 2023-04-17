@@ -202,7 +202,7 @@ function exactRiemannSolver(QL, QR, ξ, γ)
 
 end
 
-# TV Flux-Vector Splitting
+# Toro-Vazquez-Cendon Flux-Vector Splitting
 # Note: currently assumes ideal gas EOS
 function TVFlux(QL, QR, γ)
     # Calculate primitive variables
@@ -235,7 +235,7 @@ function TVFlux(QL, QR, γ)
 
 end
 
-# DOT Riemann solver
+# Dumbser-Osher-Toro Riemann solver
 function DOTFlux(QL, QR, γ)
     # Calculate |A|
     Amat = osherMatrix(QL, QR, γ);
