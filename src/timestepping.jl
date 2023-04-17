@@ -3,14 +3,20 @@
 # Load functions
 include("system.jl")
 include("riemann_solver.jl")
+include("logging.jl")
 
 # Read the solver settings from a file
 function solverSettings(filename)
+    # Read the solver settings from a file
+    report("Reading the solver settings from file $(filename)");
     file = open(filename, "r");
     Nmax = parse(Int,split(readline(file), "#")[1]);
     Nout = parse(Int,split(readline(file), "#")[1]);
     CFL = parse(Float64,split(readline(file), "#")[1]);
     close(file)
+    report("Maximum number of time steps: $(Nmax)")
+    report("Number of time steps between outputs: $(Nout)")
+    report("CFL number: $(CFL)")
     
     return Nmax, Nout, CFL
 end

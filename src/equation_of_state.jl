@@ -1,11 +1,16 @@
 # Functions for equation of state calculations
 
+# Load functions
+include("logging.jl")
+
 # Read fluid properties from a file
 function fluidProperties(filename)
     # Read the fluid properties from a file
+    report("Reading the fluid properties from file $(filename)");
     file = open(filename, "r");
     γ = parse(Float64,split(readline(file), "#")[1]);
     close(file)
+    report("Ratio of specific heats: $(γ)")
     
     return γ
 end

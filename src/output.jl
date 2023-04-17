@@ -1,7 +1,7 @@
 # Functions for plotting and saving the solver output
 
 # Load modules
-using PyPlot
+import PyPlot as plt
 using WriteVTK
 # Load functions
 include("system.jl")
@@ -45,31 +45,31 @@ function plotSolution(x, Q, γ, t, test)
     xe, We = exactSolution(x, t, γ, test);
     xec = xe[1:end-1] + 0.5 * (xe[2:end]-xe[1:end-1]);
     # Plot the solution
-    fig = figure()
-    subplot(3, 1, 1)
-    plot(xc, W[1,:], "bo", fillstyle="none", zorder = 5)
-    plot(xec, We[1,:], "k-", zorder = 1);
-    title("Solution: t = $(t)")
-    grid(true)
-    xlabel("x")
+    fig = plt.figure()
+    plt.subplot(3, 1, 1)
+    plt.plot(xc, W[1,:], "bo", fillstyle="none", zorder = 5)
+    plt.plot(xec, We[1,:], "k-", zorder = 1);
+    plt.title("Solution: t = $(t)")
+    plt.grid(true)
+    plt.xlabel("x")
     plt.xticks(round.(linspace(xc[1], xc[end], 6), digits=1))
-    ylabel("ρ")
+    plt.ylabel("ρ")
     plt.yticks(round.(linspace(minimum(W[1,:]), maximum(W[1,:]), 5), digits=2))
-    subplot(3, 1, 2)
-    plot(xc, W[2,:], "bo", fillstyle="none", zorder = 5)
-    plot(xec, We[2,:], "k-", zorder = 1);
-    grid(true)
-    xlabel("x")
+    plt.subplot(3, 1, 2)
+    plt.plot(xc, W[2,:], "bo", fillstyle="none", zorder = 5)
+    plt.plot(xec, We[2,:], "k-", zorder = 1);
+    plt.grid(true)
+    plt.xlabel("x")
     plt.xticks(round.(linspace(xc[1], xc[end], 6), digits=1))
-    ylabel("u")
+    plt.ylabel("u")
     plt.yticks(round.(linspace(minimum(W[2,:]), maximum(W[2,:]), 5), digits=2))
-    subplot(3, 1, 3)
-    plot(xc, W[3,:], "bo", fillstyle="none", zorder = 5)
-    plot(xec, We[3,:], "k-", zorder = 1);
-    grid(true)
-    xlabel("x")
+    plt.subplot(3, 1, 3)
+    plt.plot(xc, W[3,:], "bo", fillstyle="none", zorder = 5)
+    plt.plot(xec, We[3,:], "k-", zorder = 1);
+    plt.grid(true)
+    plt.xlabel("x")
     plt.xticks(round.(linspace(xc[1], xc[end], 6), digits=1))
-    ylabel("p")
+    plt.ylabel("p")
     plt.yticks(round.(linspace(minimum(W[3,:]), maximum(W[3,:]), 5), digits=2))
     # Save the plot
     plt.savefig("solution_$(t).png")
