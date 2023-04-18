@@ -8,7 +8,6 @@ import WriteVTK
 include("src/equation_of_state.jl")
 include("src/file_io.jl")
 include("src/grid.jl")
-include("src/logging.jl")
 include("src/reconstruction.jl")
 include("src/riemann_solver.jl")
 include("src/system.jl")
