@@ -1,15 +1,16 @@
 # CompFlow: A finite-volume solver for the solution of the 1D Euler equations
 
 # Load functions
-include("src/riemann_solver.jl")
 include("src/equation_of_state.jl")
-include("src/system.jl")
-include("src/reconstruction.jl")
 include("src/file_io.jl")
-include("initial_condition.jl")
-include("src/timestepping.jl")
 include("src/grid.jl")
 include("src/logging.jl")
+include("src/reconstruction.jl")
+include("src/riemann_solver.jl")
+include("src/system.jl")
+include("src/timestepping.jl")
+include("src/user_defined.jl")
+include("initial_condition.jl")
 
 # Define the domain
 report("Defining the computational domain...")
@@ -38,34 +39,8 @@ report("Saving the solution at time t = $(rpad(string(round(t, digits=6)), 8, "0
 writeSolution(x, Q, "solution_$(rpad(string(round(t, digits=6)), 8, "0")).vtr")
 
 # Compute the approximate solution
-# TODO: make this a function in src/timestepping.jl
 startTime = report("Computing the approximate solution...", 1)
-for n = 1:Nmax
-    # Compute the time step
-    Δt = getTimeStep(Q, x, γ, CFL);
-    if (t + Δt > tend)
-        Δt = tend - t;
-    end
-    # Stop criterion
-    if (t >= tend)
-        break
-    end
-    report("Current time step: $(n)   Current time: $(rpad(string(round(t + Δt, digits=6)), 8, "0"))")
-    # Reconstruct the extrapolated values at the cell boundary
-    QR, QL = reconstruct(Q, γ);
-    # Evolve the extrapolated values at the cell boundary
-    QR, QL = evolve(QR, QL, x, Δt, γ);
-    # Compute the solution at the next timestep
-    Qnew = update(QR, QL, Q, x, Δt, γ);
-    # Update the time and the solution
-    global t = t + Δt;
-    global Q = Qnew;
-    # Write the solution at every Nout time steps
-    if (n%Nout == 0)
-        report("Saving the solution at time t = $(rpad(string(round(t, digits=6)), 8, "0"))")
-        writeSolution(x, Q, "solution_$(rpad(string(round(t, digits=6)), 8, "0")).vtr")
-    end
-end
+t = computeSolution!(Q, x, γ, CFL, Nmax, Nout, t, tend);
 endTime = report("Simulation completed...", 1)
 report("Elapsed time: $(endTime - startTime)")
 

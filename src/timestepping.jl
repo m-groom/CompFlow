@@ -3,6 +3,44 @@
 # Load functions
 include("system.jl")
 include("riemann_solver.jl")
+include("logging.jl")
+include("file_io.jl")
+include("reconstruction.jl")
+
+# Function for computing the approximate solution
+function computeSolution!(Q, x, γ, CFL, Nmax, Nout, tstart, tend)
+    # Set the initial time
+    t = tstart;
+    # Start explicit timestepping
+    for n = 1:Nmax
+        # Compute the time step
+        Δt = getTimeStep(Q, x, γ, CFL);
+        if (t + Δt > tend)
+            Δt = tend - t;
+        end
+        # Stop criterion
+        if (t >= tend)
+            break
+        end
+        report("Current time step: $(n)   Current time: $(rpad(string(round(t + Δt, digits=6)), 8, "0"))")
+        # Reconstruct the extrapolated values at the cell boundary
+        QR, QL = reconstruct(Q, γ);
+        # Evolve the extrapolated values at the cell boundary
+        evolve!(QR, QL, x, Δt, γ);
+        # Compute the solution at the next timestep
+        update!(Q, QR, QL, x, Δt, γ);
+        # Update the time
+        t = t + Δt;
+        # Write the solution at every Nout time steps
+        if (n%Nout == 0)
+            report("Saving the solution at time t = $(rpad(string(round(t, digits=6)), 8, "0"))")
+            writeSolution(x, Q, "solution_$(rpad(string(round(t, digits=6)), 8, "0")).vtr")
+        end
+    end
+
+    return t
+
+end
 
 # Function for estimating the timestep size
 function getTimeStep(Q, x, γ, CFL)
@@ -24,22 +62,18 @@ end
 
 # Function for updating the solution
 # TODO: generalise boundary conditions
-function update(QR, QL, Q, x, Δt, γ)
+function update!(Q, QR, QL, x, Δt, γ)
     imax = length(x) - 1; # number of cells
-    Qnew = zeros(3, imax);
     for i = 1:imax
         Δx = x[i+1] - x[i]; # grid spacing
         if (i==1)
-            Qnew[:,i] = Q[:,i]; # Dirichlet boundary condition
+            Q[:,i] .= Q[:,i]; # Dirichlet boundary condition
         elseif (i==imax)
-            Qnew[:,i] = Q[:,i]; # Dirichlet boundary condition
+            Q[:,i] .= Q[:,i]; # Dirichlet boundary condition
         else
             Fp = riemannSolver(QR[:,i], QL[:,i+1], γ) # Flux at x[i+1/2]
             Fm = riemannSolver(QR[:,i-1], QL[:,i], γ) # Flux at x[i-1/2]
-            Qnew[:,i] = Q[:,i] - Δt/Δx * (Fp - Fm);
+            Q[:,i] .= Q[:,i] - Δt/Δx * (Fp - Fm);
         end
-    end 
-
-    return Qnew
-
+    end
 end

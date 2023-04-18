@@ -62,7 +62,7 @@ function reconstruct(Q, γ, limiter = "minmod", recVars = "conserved", recType =
 end
 
 # Compute the time derivative (Cauchy-Kovalevskaya: Q_t = -F_x) and evolve the reconstructed data
-function evolve(QR, QL, x, dt, γ)
+function evolve!(QR, QL, x, Δt, γ)
     imax = size(QR, 2);
     nVar = size(QR, 1);
     Qt = zeros(nVar, imax);
@@ -71,11 +71,8 @@ function evolve(QR, QL, x, dt, γ)
         Qt[:, i] = - (Fa(QR[:,i], γ) .- Fa(QL[:,i], γ)) / dx;
     end
     # Update the extrapolated values
-    QR = QR .+ 0.5 * dt * Qt;
-    QL = QL .+ 0.5 * dt * Qt;
-
-    return QR, QL
-
+    QR .= QR .+ 0.5 * Δt * Qt;
+    QL .= QL .+ 0.5 * Δt * Qt;
 end
 
 # Function for calculating the slope
