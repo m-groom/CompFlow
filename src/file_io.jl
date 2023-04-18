@@ -1,14 +1,5 @@
 # Functions for file I/O as well as plotting and saving the solver output
 
-# # Load modules
-# import PyPlot as plt
-# using WriteVTK
-# Load functions
-# include("system.jl")
-# include("riemann_solver.jl")
-# include("logging.jl")
-# include("../initial_condition.jl")
-
 # Read the solver settings from a file
 function solverSettings(filename)
     # Read the solver settings from a file
@@ -53,7 +44,7 @@ function writeSolution(x, Q, filename)
         ρE[i, 1, 1] = Q[3, i];
     end
     # Write to .vtr file
-    vtk_grid(filename, x, y, z) do vtk
+    WriteVTK.vtk_grid(filename, x, y, z) do vtk
         vtk["Density"] = ρ;
         vtk["Momentum"] = ρu;
         vtk["Energy"] = ρE;

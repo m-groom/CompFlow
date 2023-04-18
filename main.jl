@@ -3,7 +3,7 @@
 # Load modules
 import PyPlot as plt
 import Dates
-using WriteVTK
+import WriteVTK
 # Load functions
 include("src/equation_of_state.jl")
 include("src/file_io.jl")
