@@ -1,4 +1,4 @@
-# Functions for plotting and saving the solver output
+# Functions for file I/O as well as plotting and saving the solver output
 
 # Load modules
 import PyPlot as plt

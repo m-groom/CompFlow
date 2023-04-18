@@ -1,7 +1,7 @@
-# Functions for computing iterative solution to the exact Riemann problem
-# Note: currently only valid for fixed γ and ideal gas EOS
+# User defined functions
 
-# Newton iteration to compute p* and u*
+# Newton iteration to compute p* and u* for the exact Riemann solver
+# Note: currently only valid for fixed γ and ideal gas EOS
 function newton(WL, WR, CL, CR, G)
     # Extract velocities
     UL = WL[2]; UR = WR[2]; 
@@ -77,45 +77,5 @@ function fK(P, WK, CK, G)
     end
 
     return ϕ, dϕ
-
-end
-
-# Adaptive Noniterative Riemann solver (from Sec. 9.5.2 of Toro)
-# Returns pressure in the star region by selecting from PVRS, TRRS or TSRS
-function ANRS(WL, WR, CL, CR, G)
-    # Extract primitive variables
-    DL = WL[1]; UL = WL[2]; PL = WL[3];
-    DR = WR[1]; UR = WR[2]; PR = WR[3];
-    # User specified pressure ratio
-    Quser = 2.0;
-    # Compute initial guess for pressure in the star region from PVRS
-    CUP = 0.25 * (DL + DR) * (CL + CR);
-    PPV = max(0.0, 0.5 * (PL + PR) + 0.5 * (UL - UR) * CUP);
-    Pmin = min(PL, PR);
-    Pmax = max(PL, PR);
-    Qmax = Pmax / Pmin;
-
-    if (Qmax <= Quser && (Pmin <= PPV && PPV <= Pmax))
-        # Use solution from PVRS Riemann solver
-        PM = PPV;
-        UM = 0.5 * (UL + UR) + 0.5 * (PL - PR) / CUP;
-    else
-        if (PPV < Pmin)
-            # Use solution from the Two-Rarefaction Riemann solver
-            PQ = (PL / PR)^(G[1]);
-            UM = (PQ*UL/CL + UR/CR + G[4]*(PQ - 1.0))/(PQ/CL + 1.0/CR);
-            PTL = 1.0 + G[7]*(UL - UM)/CL;
-            PTR = 1.0 + G[7]*(UM - UR)/CR;
-            PM = 0.5 * (PL*PTL^(G[3]) + PR*PTR^(G[3]));
-        else
-            # Use solution from the Two-Shock Riemann solver
-            GEL = sqrt(G[5]/(DL*(G[6]*PL + PPV)));
-            GER = sqrt(G[5]/(DR*(G[6]*PR + PPV)));
-            PM = (GEL*PL + GER*PR - (UR - UL))/(GEL + GER);
-            UM = 0.5*(UL + UR) + 0.5*(GER*(PM - PR) - GEL*(PM - PL))
-        end
-    end
-
-    return PM, UM
 
 end
