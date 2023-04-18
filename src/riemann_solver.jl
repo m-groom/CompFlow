@@ -241,3 +241,36 @@ function exactRiemannSolver(QL, QR, ξ, γ)
     return Q
 
 end
+
+# Toro-Vazquez-Cendon Flux-Vector Splitting
+# Note: currently assumes ideal gas EOS
+function TVFlux(QL, QR, γ)
+    # Calculate primitive variables
+    DL, UL, PL = consToPrim(QL, γ);
+    DR, UR, PR  = consToPrim(QR, γ);
+    # Calculate speed of sound
+    SL = speedOfSound(QL, γ);
+    SR = speedOfSound(QR, γ);
+    # Calculate linearised Riemann invariants
+    AL = sqrt(UL^2 + 4.0 * SL^2); # Real gases: AL = sqrt(UL^2 + 4.0 * HL / (DL*dedp));
+    AR = sqrt(UR^2 + 4.0 * SR^2); # Real gases: AR = sqrt(UR^2 + 4.0 * HR / (DR*dedp));
+    CL = DL * (UL - AL);
+    CR = DR * (UR + AR);
+    # Velocity and pressure in the star region
+    US = (CR*UR-CL*UL - 2.0*(PR-PL)) / (CR-CL);
+    PS = (CR*PL-CL*PR + 0.5*CR*CL*(UR-UL)) / (CR-CL);
+    # Calculate advection flux
+    if (US >= 0)
+        DK = DL;
+        advectionFlux = US * [DL; DL*UL; 0.5*DL*UL^2];
+    else
+        DK = DR;
+        advectionFlux = US * [DR; DR*UR; 0.5*DR*UR^2];
+    end
+    # Calculate pressure flux
+    e = internalEnergy([DK; US; PS], γ);
+    pressureFlux = [0.0; PS; US*(DK*e + PS)];
+
+    return advectionFlux + pressureFlux
+
+end
