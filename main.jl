@@ -23,7 +23,7 @@ report("Defining the solver settings...")
 Nmax, Nout, CFL = solverSettings("solver.par");
 # Define the fluid properties
 report("Defining the fluid properties...")
-γ = fluidProperties("thermo.par");
+γ, μ = fluidProperties("thermo.par");
 # Set the initial time
 t = 0.0;
 

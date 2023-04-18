@@ -39,10 +39,12 @@ function fluidProperties(filename)
     report("Reading the fluid properties from file $(filename)");
     file = open(filename, "r");
     γ = parse(Float64,split(readline(file), "#")[1]);
+    μ = parse(Float64,split(readline(file), "#")[1]);
     close(file)
     report("Ratio of specific heats: $(γ)")
+    report("Dynamic viscosity: $(μ)")
     
-    return γ
+    return γ, μ
 end
 
 # Save the solution to a VTK file
