@@ -12,7 +12,7 @@ function pressure(Q, γ, eosType = "ideal")
 end
 
 # Take the vector of conserved variables as input and returns the speed of sound
-function speedOfSound(Q, γ = 5/3, eosType = "ideal")
+function speedOfSound(Q, γ, eosType = "ideal")
     ρ = Q[1]; u = Q[2]/Q[1]; ρE = Q[3];
     if (eosType == "ideal")
         p = (γ - 1.0)*(ρE - 0.5*ρ*u^2);

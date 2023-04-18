@@ -34,6 +34,7 @@ function solverSettings(filename)
 end
 
 # Read fluid properties from a file
+# TODO: return a struct of all the fluid properties
 function fluidProperties(filename)
     # Read the fluid properties from a file
     report("Reading the fluid properties from file $(filename)");
