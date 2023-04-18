@@ -17,7 +17,7 @@ include("initial_condition.jl")
 
 # Define the domain
 report("Defining the computational domain...")
-x = makeGrid("grid.par");
+x, BCs = makeGrid("grid.par");
 # Define the solver settings
 report("Defining the solver settings...")
 Nmax, Nout, CFL = solverSettings("solver.par");
