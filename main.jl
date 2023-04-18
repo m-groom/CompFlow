@@ -5,8 +5,8 @@ include("src/riemann_solver.jl")
 include("src/equation_of_state.jl")
 include("src/system.jl")
 include("src/reconstruction.jl")
-include("src/output.jl")
-include("src/initial_condition.jl")
+include("src/file_io.jl")
+include("initial_condition.jl")
 include("src/timestepping.jl")
 include("src/grid.jl")
 include("src/logging.jl")
@@ -17,7 +17,6 @@ x = makeGrid("grid.par");
 # Define the solver settings
 report("Defining the solver settings...")
 Nmax, Nout, CFL = solverSettings("solver.par");
-# Print the solver settings
 # Define the fluid properties
 report("Defining the fluid properties...")
 γ = fluidProperties("thermo.par");
@@ -39,6 +38,7 @@ report("Saving the solution at time t = $(rpad(string(round(t, digits=6)), 8, "0
 writeSolution(x, Q, "solution_$(rpad(string(round(t, digits=6)), 8, "0")).vtr")
 
 # Compute the approximate solution
+# TODO: make this a function in src/timestepping.jl
 startTime = report("Computing the approximate solution...", 1)
 for n = 1:Nmax
     # Compute the time step

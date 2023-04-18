@@ -6,7 +6,36 @@ using WriteVTK
 # Load functions
 include("system.jl")
 include("riemann_solver.jl")
-include("initial_condition.jl")
+include("logging.jl")
+include("../initial_condition.jl")
+
+# Read the solver settings from a file
+function solverSettings(filename)
+    # Read the solver settings from a file
+    report("Reading the solver settings from file $(filename)");
+    file = open(filename, "r");
+    Nmax = parse(Int,split(readline(file), "#")[1]);
+    Nout = parse(Int,split(readline(file), "#")[1]);
+    CFL = parse(Float64,split(readline(file), "#")[1]);
+    close(file)
+    report("Maximum number of time steps: $(Nmax)")
+    report("Number of time steps between outputs: $(Nout)")
+    report("CFL number: $(CFL)")
+    
+    return Nmax, Nout, CFL
+end
+
+# Read fluid properties from a file
+function fluidProperties(filename)
+    # Read the fluid properties from a file
+    report("Reading the fluid properties from file $(filename)");
+    file = open(filename, "r");
+    γ = parse(Float64,split(readline(file), "#")[1]);
+    close(file)
+    report("Ratio of specific heats: $(γ)")
+    
+    return γ
+end
 
 # Save the solution to a VTK file
 function writeSolution(x, Q, filename)

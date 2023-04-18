@@ -1,7 +1,7 @@
 # Functions for calculating the initial condition
 
 # Load functions
-include("system.jl")
+include("src/system.jl")
 
 # Calculate the initial condition
 function initialCondition(x, test, γ)
