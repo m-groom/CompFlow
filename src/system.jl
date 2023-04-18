@@ -1,8 +1,5 @@
 # Functions describing the system of equations
 
-# Load functions
-include("equation_of_state.jl")
-
 # Define the advective flux as a function of Q
 function Fa(Q, γ)
     flux = zeros(3,1);

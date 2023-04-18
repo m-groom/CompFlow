@@ -1,10 +1,5 @@
 # Functions for computing the solution of the Riemann problem
 
-# Load functions
-include("equation_of_state.jl")
-include("user_defined.jl")
-include("system.jl")
-
 # HLLC, HLL and Rusanov Riemann solvers
 function riemannSolver(QL, QR, γ, fluxType = "HLLC")
     # Calculate primitive variables

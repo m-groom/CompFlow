@@ -1,12 +1,5 @@
 # Functions for updating the solution at each timestep
 
-# Load functions
-include("system.jl")
-include("riemann_solver.jl")
-include("logging.jl")
-include("file_io.jl")
-include("reconstruction.jl")
-
 # Function for computing the approximate solution
 function computeSolution!(Q, x, γ, CFL, Nmax, Nout, tstart, tend)
     # Set the initial time

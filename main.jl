@@ -1,5 +1,9 @@
 # CompFlow: A finite-volume solver for the solution of the 1D Euler equations
 
+# Load modules
+import PyPlot as plt
+import Dates
+using WriteVTK
 # Load functions
 include("src/equation_of_state.jl")
 include("src/file_io.jl")

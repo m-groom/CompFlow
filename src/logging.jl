@@ -1,8 +1,5 @@
 # Functions for logging the solver output
 
-# Load modules
-import Dates
-
 # Function for printing a message to stdout and a log file
 function report(message, returnTime = 0)
     # Get the current time

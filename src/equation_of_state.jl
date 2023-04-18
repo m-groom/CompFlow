@@ -1,8 +1,5 @@
 # Functions for equation of state calculations
 
-# Load functions
-include("logging.jl")
-
 # Take the vector of conserved variables as input and returns the pressure
 function pressure(Q, γ, eosType = "ideal")
     ρ = Q[1]; u = Q[2]/Q[1]; ρE = Q[3];

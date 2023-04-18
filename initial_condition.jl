@@ -1,8 +1,5 @@
 # Functions for calculating the initial condition
 
-# Load functions
-include("src/system.jl")
-
 # Calculate the initial condition
 function initialCondition(x, test, γ)
     # Initialise array

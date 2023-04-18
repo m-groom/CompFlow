@@ -1,8 +1,5 @@
 # Functions for grid generation and manipulation
 
-# Load functions
-include("logging.jl")
-
 # Read the domain information from a file and build the grid
 function makeGrid(filename)
     # Read the domain information from a file

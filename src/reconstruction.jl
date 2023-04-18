@@ -1,8 +1,5 @@
 # Functions for reconstructing the solution at the cell interface
 
-# Load functions
-include("system.jl")
-
 # Function for performing reconstruction and returning extrapolated values
 # TODO: generalise boundary conditions
 function reconstruct(Q, γ, limiter = "minmod", recVars = "conserved", recType = "characteristic")

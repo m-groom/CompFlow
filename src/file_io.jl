@@ -1,13 +1,13 @@
 # Functions for file I/O as well as plotting and saving the solver output
 
-# Load modules
-import PyPlot as plt
-using WriteVTK
+# # Load modules
+# import PyPlot as plt
+# using WriteVTK
 # Load functions
-include("system.jl")
-include("riemann_solver.jl")
-include("logging.jl")
-include("../initial_condition.jl")
+# include("system.jl")
+# include("riemann_solver.jl")
+# include("logging.jl")
+# include("../initial_condition.jl")
 
 # Read the solver settings from a file
 function solverSettings(filename)
