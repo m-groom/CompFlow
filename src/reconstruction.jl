@@ -2,7 +2,7 @@
 
 # Function for performing reconstruction and returning extrapolated values
 # TODO: generalise boundary conditions
-function reconstruct(Q, γ, limiter = "minmod", recVars = "conserved", recType = "characteristic")
+function reconstruct(Q, γ, limiter = "eno", recVars = "conserved", recType = "characteristic")
     imax = size(Q, 2);
     nVar = size(Q, 1);
     if (recVars == "primitive")
@@ -86,6 +86,8 @@ function slope(a, b, limiter, recType = "regular")
             Δ = superbee.(a, b);
         elseif (limiter == "vanLeer")
             Δ = vanLeer.(a, b);
+        elseif (limiter == "eno")
+            Δ = eno.(a, b);
         elseif (limiter == "central")
             Δ = central.(a, b);
         elseif (limiter == "firstOrder")
@@ -131,6 +133,15 @@ function vanLeer(a, b)
     end
 
     return φ * a
+end
+
+# 2nd-order ENO
+function eno(a, b)
+    if (abs(a) <= abs(b))
+        return a
+    else
+        return b
+    end
 end
 
 # Central difference reconstruction
