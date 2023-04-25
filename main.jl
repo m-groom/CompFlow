@@ -12,6 +12,7 @@ include("src/reconstruction.jl")
 include("src/riemann_solver.jl")
 include("src/system.jl")
 include("src/timestepping.jl")
+include("src/boundary_conditions.jl")
 include("src/user_defined.jl")
 include("initial_condition.jl")
 

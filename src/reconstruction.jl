@@ -1,7 +1,6 @@
 # Functions for reconstructing the solution at the cell interface
 
 # Function for performing reconstruction and returning extrapolated values
-# TODO: generalise boundary conditions
 function reconstruct(Q, BCs, γ, limiter = "minmod", recVars = "conserved", recType = "characteristic")
     imax = size(Q, 2);
     nVar = size(Q, 1);
@@ -21,11 +20,11 @@ function reconstruct(Q, BCs, γ, limiter = "minmod", recVars = "conserved", recT
     for i = 1:imax
         # Boundary conditions
         if (i==1) 
-            a = zeros(3,1); # Dirichlet boundary condition
+            a = slopeBoundaryCondition(W[:,i], BCs[1,1], "left");
             b = W[:,i+1] - W[:,i];
         elseif (i==imax) 
             a = W[:,i] - W[:,i-1];
-            b = zeros(3,1); # Dirichlet boundary condition
+            b = slopeBoundaryCondition(W[:,i], BCs[1,2], "right");
         else
             a = W[:,i] - W[:,i-1]; b = W[:,i+1] - W[:,i];
         end
