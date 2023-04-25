@@ -1,7 +1,7 @@
 # Functions for updating the solution at each timestep
 
 # Function for computing the approximate solution
-function computeSolution!(Q, x, γ, CFL, Nmax, Nout, tstart, tend)
+function computeSolution!(Q, x, BCs, γ, CFL, Nmax, Nout, tstart, tend)
     # Set the initial time
     t = tstart;
     # Start explicit timestepping
@@ -17,11 +17,11 @@ function computeSolution!(Q, x, γ, CFL, Nmax, Nout, tstart, tend)
         end
         report("Current time step: $(n)   Current time: $(rpad(string(round(t + Δt, digits=6)), 8, "0"))")
         # Reconstruct the extrapolated values at the cell boundary
-        QR, QL = reconstruct(Q, γ);
+        QR, QL = reconstruct(Q, BCs, γ);
         # Evolve the extrapolated values at the cell boundary
         evolve!(QR, QL, x, Δt, γ);
         # Compute the solution at the next timestep
-        update!(Q, QR, QL, x, Δt, γ);
+        update!(Q, QR, QL, x, BCs, Δt, γ);
         # Update the time
         t = t + Δt;
         # Write the solution at every Nout time steps
@@ -55,7 +55,7 @@ end
 
 # Function for updating the solution
 # TODO: generalise boundary conditions
-function update!(Q, QR, QL, x, Δt, γ)
+function update!(Q, QR, QL, x, BCs, Δt, γ)
     imax = length(x) - 1; # number of cells
     for i = 1:imax
         Δx = x[i+1] - x[i]; # grid spacing

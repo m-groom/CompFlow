@@ -28,7 +28,7 @@ report("Defining the fluid properties...")
 t = 0.0;
 
 # Initial condition
-test = 6; # test case to use (0-6)
+test = 1; # test case to use (0-6)
 report("Computing the initial condition...")
 report("Test case: $(test)")
 Q, tend = initialCondition(x, test, γ);
@@ -43,7 +43,7 @@ writeSolution(x, Q, "solution_$(rpad(string(round(t, digits=6)), 8, "0")).vtr")
 
 # Compute the approximate solution
 startTime = report("Computing the approximate solution...", 1)
-t = computeSolution!(Q, x, γ, CFL, Nmax, Nout, t, tend);
+t = computeSolution!(Q, x, BCs, γ, CFL, Nmax, Nout, t, tend);
 endTime = report("Simulation completed...", 1)
 report("Elapsed time: $(endTime - startTime)")
 

@@ -2,7 +2,7 @@
 
 # Function for performing reconstruction and returning extrapolated values
 # TODO: generalise boundary conditions
-function reconstruct(Q, γ, limiter = "eno", recVars = "conserved", recType = "characteristic")
+function reconstruct(Q, BCs, γ, limiter = "minmod", recVars = "conserved", recType = "characteristic")
     imax = size(Q, 2);
     nVar = size(Q, 1);
     if (recVars == "primitive")
@@ -19,23 +19,28 @@ function reconstruct(Q, γ, limiter = "eno", recVars = "conserved", recType = "c
     # Piecewise linear reconstruction in space
     ΔW = zeros(nVar, imax);
     for i = 1:imax
+        # Boundary conditions
         if (i==1) 
-            ΔW[:,i] = zeros(3,1); # Dirichlet boundary condition
+            a = zeros(3,1); # Dirichlet boundary condition
+            b = W[:,i+1] - W[:,i];
         elseif (i==imax) 
-            ΔW[:,i] = zeros(3,1); # Dirichlet boundary condition
+            a = W[:,i] - W[:,i-1];
+            b = zeros(3,1); # Dirichlet boundary condition
         else
-            if (recType == "regular")
-                ΔW[:,i] = slope(W[:,i] - W[:,i-1], W[:,i+1] - W[:,i], limiter, recType);
-            elseif (recType == "characteristic")
-                # Get left and right eigenvectors
-                L = eigVecInv(W[:,i], γ, recVars); R = eigVec(W[:,i], γ, recVars);
-                # Project differences onto characteristic fields
-                a = L * (W[:,i] - W[:,i-1]); b = L * (W[:,i+1] - W[:,i]);
-                # Compute the slope and project back
-                ΔW[:,i] = R * slope(a, b, limiter, recType);
-            else
-                error("Invalid reconstruction type: $(recType)")
-            end
+            a = W[:,i] - W[:,i-1]; b = W[:,i+1] - W[:,i];
+        end
+        # Reconstruction
+        if (recType == "regular")
+            ΔW[:,i] = slope(a, b, limiter, recType);
+        elseif (recType == "characteristic")
+            # Get left and right eigenvectors
+            L = eigVecInv(W[:,i], γ, recVars); R = eigVec(W[:,i], γ, recVars);
+            # Project differences onto characteristic fields
+            a = L * a; b = L * b;
+            # Compute the slope and project back
+            ΔW[:,i] = R * slope(a, b, limiter, recType);
+        else
+            error("Invalid reconstruction type: $(recType)")
         end
     end
     # Extrapolate to cell boundaries
