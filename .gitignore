@@ -1,3 +1,4 @@
 simulation.log
 solution_*
 *.ipynb
+.DS_Store
