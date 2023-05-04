@@ -18,25 +18,25 @@ include("initial_condition.jl")
 
 # Define the domain
 report("Defining the computational domain...")
-x, BCs = makeGrid("grid.par");
+x, BCs = makeGrid("grid.par")
 # Define the solver settings
 report("Defining the solver settings...")
-Nmax, Nout, CFL = solverSettings("solver.par");
+Nmax, Nout, CFL = solverSettings("solver.par")
 # Define the fluid properties
 report("Defining the fluid properties...")
-γ, μ = fluidProperties("thermo.par");
+γ, μ = fluidProperties("thermo.par")
 # Set the initial time
-t = 0.0;
+t = 0.0
 
 # Initial condition
-test = 1; # test case to use (0-6)
+test = 1 # test case to use (0-6)
 report("Computing the initial condition...")
 report("Test case: $(test)")
-Q, tend = initialCondition(x, test, γ);
+Q, tend = initialCondition(x, test, γ)
 
 # Plot the initial condition
 report("Plotting the solution at time t = $(round(t, digits=6))")
-fig1 = plotSolution(x, Q, γ, t, test);
+fig1 = plotSolution(x, Q, γ, t, test)
 
 # Save the initial condition
 report("Saving the solution at time t = $(rpad(string(round(t, digits=6)), 8, "0"))")
@@ -44,13 +44,13 @@ writeSolution(x, Q, "solution_$(rpad(string(round(t, digits=6)), 8, "0")).vtr")
 
 # Compute the approximate solution
 startTime = report("Computing the approximate solution...", 1)
-t = computeSolution!(Q, x, BCs, γ, CFL, Nmax, Nout, t, tend);
+t = computeSolution!(Q, x, BCs, γ, CFL, Nmax, Nout, t, tend)
 endTime = report("Simulation completed...", 1)
 report("Elapsed time: $(endTime - startTime)")
 
 # Plot the final solution
 report("Plotting the solution at time t = $(round(t, digits=6))")
-fig2 = plotSolution(x, Q, γ, t, test);
+fig2 = plotSolution(x, Q, γ, t, test)
 
 # Save the final solution
 report("Saving the solution at time t = $(rpad(string(round(t, digits=6)), 8, "0"))")
