@@ -65,9 +65,9 @@ function writeSolution(x, Q, filename)
     end
     # Write to .vtr file
     WriteVTK.vtk_grid(filename, x, y, z) do vtk
-        vtk["Density"] = ρ
-        vtk["Momentum"] = ρu
-        vtk["Energy"] = ρE
+        vtk["Density", WriteVTK.VTKCellData()] = ρ
+        vtk["Momentum", WriteVTK.VTKCellData()] = ρu
+        vtk["Energy", WriteVTK.VTKCellData()] = ρE
     end
 
 end
